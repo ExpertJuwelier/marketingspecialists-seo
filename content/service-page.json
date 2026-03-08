@@ -1,0 +1,78 @@
+{
+  "type": "service",
+  "path": "/services/digital-marketing-services.html",
+  "title": "Digital Marketing Services For Every Business",
+  "metaDescription": "Explore digital marketing services designed to help businesses grow through SEO, PPC, social media, content, strategy, and conversion support.",
+  "eyebrow": "Digital Marketing Services",
+  "heroTitle": "Digital Marketing Services For Every Business",
+  "heroText": "Scalable SEO, PPC, social media, content, and strategy support designed to help businesses grow online with confidence.",
+  "heroButtonLabel": "View Packages",
+  "heroButtonUrl": "https://marketingspecialists.co.za/digital-marketing-package-prices",
+  "heroImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=80",
+  "heroAlt": "Digital marketing dashboard and business growth analytics",
+  "whyChooseTitle": "Why Choose The Marketing Specialists?",
+  "whyChooseItems": [
+    {
+      "title": "Targeted digital strategy",
+      "text": "We focus on practical marketing actions that support visibility, growth, and measurable business outcomes."
+    },
+    {
+      "title": "Data-led decision making",
+      "text": "Our work is guided by real performance signals, not guesswork."
+    },
+    {
+      "title": "Service depth",
+      "text": "From SEO and PPC to content and social media, we help businesses build stronger digital systems."
+    },
+    {
+      "title": "Clear communication",
+      "text": "We keep the process understandable so clients know what is being done and why it matters."
+    }
+  ],
+  "servicesTitle": "Digital Marketing Services",
+  "services": [
+    {
+      "title": "Search Engine Optimisation",
+      "text": "Strengthen organic visibility, improve page targeting, and build a better long-term search presence."
+    },
+    {
+      "title": "PPC Advertising",
+      "text": "Generate faster visibility with paid campaigns that support lead generation and testing."
+    },
+    {
+      "title": "Social Media Marketing",
+      "text": "Build stronger brand presence and more consistent audience engagement."
+    },
+    {
+      "title": "Content Marketing",
+      "text": "Use strategic content to improve visibility, support SEO, and build trust."
+    }
+  ],
+  "ctaPanel": {
+    "headline": "Get a Free Digital Marketing Strategy",
+    "text": "See what a smarter digital plan could look like for your business.",
+    "buttonLabel": "Get Free Strategy",
+    "buttonUrl": "https://marketingspecialists.co.za/free-marketing-strategy"
+  },
+  "insightsTitle": "Digital Marketing Insights",
+  "related": [
+    "/guides/google-ads-vs-seo-for-small-business.html",
+    "/guides/how-much-does-seo-cost-south-africa.html",
+    "/industries/digital-marketing-for-lawyers.html"
+  ],
+  "faqTitle": "Digital Marketing FAQs",
+  "faqs": [
+    {
+      "question": "How long before digital marketing starts showing results?",
+      "answer": "That depends on the channel. Paid campaigns can create faster visibility, while SEO and content usually take longer but often produce stronger long-term value."
+    },
+    {
+      "question": "Do I need SEO and paid ads together?",
+      "answer": "Not always, but many businesses benefit from using both. Paid ads can create quick visibility while SEO builds long-term search strength."
+    },
+    {
+      "question": "Can I choose only one service?",
+      "answer": "Yes. Businesses can start with one focused service and expand later as their needs grow."
+    }
+  ]
+}

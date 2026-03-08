@@ -1,0 +1,407 @@
+{
+  "site": {
+    "name": "The Marketing Specialists",
+    "tagline": "All Channels One Agency",
+    "logoUrl": "https://payhip.com/cdn-cgi/image/format=auto,width=1500/https://pe56d.s3.amazonaws.com/o_1ivaea2ht1upe1mkl17tq9tagnj17.png",
+    "nav": [
+      {
+        "label": "Home",
+        "url": "https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa"
+      },
+      {
+        "label": "About",
+        "url": "https://marketingspecialists.co.za/about-digital-marketing-specialists"
+      },
+      {
+        "label": "Services",
+        "url": "https://marketingspecialists.co.za/digital-marketing-services"
+      },
+      {
+        "label": "Insights",
+        "url": "https://marketingspecialists.co.za/digital-marketing-insights"
+      },
+      {
+        "label": "Marketing Tools",
+        "url": "https://marketingspecialists.co.za/free-marketing-tools"
+      },
+      {
+        "label": "Contact",
+        "url": "https://marketingspecialists.co.za/contact"
+      }
+    ],
+    "footerLinks": [
+      {
+        "label": "Digital Marketing Services",
+        "url": "https://marketingspecialists.co.za/digital-marketing-services"
+      },
+      {
+        "label": "Package Prices",
+        "url": "https://marketingspecialists.co.za/digital-marketing-package-prices"
+      },
+      {
+        "label": "Contact Us",
+        "url": "https://marketingspecialists.co.za/contact"
+      },
+      {
+        "label": "T & C's",
+        "url": "https://marketingspecialists.co.za/terms-and-conditions"
+      },
+      {
+        "label": "Privacy",
+        "url": "https://marketingspecialists.co.za/privacy-policy"
+      }
+    ]
+  },
+  "pages": [
+    {
+      "type": "hub",
+      "path": "/",
+      "title": "SEO Content Hub | The Marketing Specialists",
+      "metaDescription": "Explore SEO guides, industry pages, and city pages from The Marketing Specialists.",
+      "schemaType": "CollectionPage",
+      "eyebrow": "SEO Content Hub",
+      "heroImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "Marketing analytics dashboard",
+      "intro": "This is the working hub for your Cloudflare SEO section. It will connect guides, industry pages, city pages, and later service and tool pages.",
+      "sections": [
+        {
+          "heading": "What this hub is for",
+          "body": "This page should not behave like a normal article. It is the central hub that helps visitors discover your guides, niche pages, local pages, and future tool pages."
+        },
+        {
+          "heading": "Why this matters",
+          "body": "Different page types help your site target different kinds of search intent. Guides answer questions, industry pages target sector-specific buyers, and city pages support local search visibility."
+        },
+        {
+          "heading": "What happens next",
+          "body": "The next phase is to move away from manually editing separate HTML files and start generating these pages from structured data using Cloudflare."
+        },
+        {
+          "heading": "Why this becomes powerful",
+          "body": "Once the generator is in place, new pages can be added much faster and connected with stronger internal linking so the site becomes a real SEO lead generation system."
+        }
+      ],
+      "faqTitle": "SEO Hub FAQs",
+      "faqs": [
+        {
+          "question": "What is this SEO hub for?",
+          "answer": "This hub is designed to organise your SEO content system by connecting guides, industry pages, city pages, and future landing or tool pages in one place."
+        },
+        {
+          "question": "Will this replace manual page building?",
+          "answer": "Yes. The goal is for this hub and the surrounding pages to be generated from structured content data rather than hand-built one by one."
+        },
+        {
+          "question": "Will existing pages stay usable?",
+          "answer": "Yes. The current pages can remain as working references while the generated system is being built and tested."
+        }
+      ],
+      "cta": {
+        "headline": "Ready to Grow Your Online Presence?",
+        "text": "Looking for a digital marketing service that will grow your business?",
+        "buttonLabel": "Digital Marketing Services",
+        "buttonUrl": "https://marketingspecialists.co.za/digital-marketing-services"
+      },
+      "related": [
+        "/guides/google-ads-vs-seo-for-small-business.html",
+        "/industries/digital-marketing-for-lawyers.html",
+        "/cities/seo-services-johannesburg.html"
+      ]
+    },
+    {
+      "type": "guide",
+      "path": "/guides/google-ads-vs-seo-for-small-business.html",
+      "title": "Google Ads vs SEO for Small Business",
+      "metaDescription": "Compare Google Ads and SEO for small business growth, lead generation, visibility, speed, long-term value, and budget decisions.",
+      "schemaType": "Article",
+      "eyebrow": "SEO Guide",
+      "heroImage": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "Analytics dashboard comparing traffic sources and marketing performance",
+      "intro": "Small businesses often ask the same question: should the budget go into Google Ads, SEO, or both? The answer depends on how quickly you need results, how competitive your market is, and whether you are building for short-term wins or long-term growth.",
+      "sections": [
+        {
+          "heading": "What Google Ads does well",
+          "body": "Google Ads can put your business in front of searchers almost immediately. That makes it useful when you want fast visibility, quick lead testing, or short-term campaign support."
+        },
+        {
+          "heading": "What SEO does well",
+          "body": "SEO helps your business build long-term visibility in search. Instead of paying for every click, you invest in pages, structure, optimisation, and content that can keep attracting traffic over time."
+        },
+        {
+          "heading": "Where Google Ads can become expensive",
+          "body": "Google Ads is powerful, but once the spend stops, the traffic stops too. In competitive industries, the cost per click can rise quickly, which makes it harder for smaller businesses to maintain consistent results."
+        },
+        {
+          "heading": "Where SEO takes more patience",
+          "body": "SEO is not instant. It takes time to build rankings, improve page quality, strengthen internal linking, and earn visibility. The long-term payoff is often stronger, but it requires patience and consistency."
+        },
+        {
+          "heading": "Why the best answer is often both",
+          "body": "In many cases, the smartest strategy is not Google Ads versus SEO, but Google Ads plus SEO. Ads help create immediate visibility while SEO builds lasting organic reach."
+        }
+      ],
+      "faqTitle": "Google Ads vs SEO FAQs",
+      "faqs": [
+        {
+          "question": "Is SEO better than Google Ads for small business?",
+          "answer": "SEO is often better for long-term growth and compounding visibility, while Google Ads is often better for immediate traffic and faster campaign testing."
+        },
+        {
+          "question": "Should a small business use both SEO and Google Ads?",
+          "answer": "Yes. In many cases the strongest approach is to use both. Google Ads can create fast visibility while SEO builds stronger long-term search presence."
+        },
+        {
+          "question": "Which one is more cost-effective over time?",
+          "answer": "SEO often becomes more cost-effective over time because rankings can continue to bring traffic without paying for every click, while Google Ads stops the moment spend is paused."
+        }
+      ],
+      "cta": {
+        "headline": "Need the Right Growth Mix?",
+        "text": "Build a smarter strategy that balances immediate visibility with long-term search growth.",
+        "buttonLabel": "Contact Us",
+        "buttonUrl": "https://marketingspecialists.co.za/contact"
+      },
+      "related": [
+        "/guides/how-much-does-seo-cost-south-africa.html",
+        "/guides/how-seo-pages-bring-leads.html",
+        "/cities/seo-services-johannesburg.html"
+      ]
+    },
+    {
+      "type": "guide",
+      "path": "/guides/how-much-does-seo-cost-south-africa.html",
+      "title": "How Much Does SEO Cost in South Africa?",
+      "metaDescription": "Learn what SEO costs in South Africa, what affects pricing, and how businesses should think about SEO packages, value, and lead generation.",
+      "schemaType": "Article",
+      "eyebrow": "SEO Guide",
+      "heroImage": "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "SEO pricing and business budgeting in South Africa",
+      "intro": "SEO pricing in South Africa can look confusing at first because not every business needs the same level of work. The real question is not only what SEO costs, but what kind of SEO your business actually needs.",
+      "sections": [
+        {
+          "heading": "Why SEO pricing is not one-size-fits-all",
+          "body": "Some businesses need basic on-page improvements and a stronger content structure. Others need technical fixes, local SEO, service page optimisation, ongoing article creation, and a broader strategy to compete in tougher markets."
+        },
+        {
+          "heading": "What usually affects SEO cost",
+          "body": "Pricing is usually shaped by your website size, the competitiveness of your niche, the number of pages that need work, the quality of your existing content, and whether you need monthly support or just a once-off improvement plan."
+        },
+        {
+          "heading": "Why cheaper SEO is not always better",
+          "body": "Very cheap SEO can be tempting, especially for smaller businesses, but low prices often mean shallow work. If the strategy is weak, the content is thin, or the optimisation is rushed, the campaign may not create meaningful visibility or enquiries."
+        },
+        {
+          "heading": "What businesses should actually compare",
+          "body": "Instead of comparing SEO providers on price alone, compare the work included. Look at whether the package covers strategy, keyword targeting, technical fixes, internal linking, service page improvement, content support, reporting, and long-term direction."
+        },
+        {
+          "heading": "How to think about SEO as an investment",
+          "body": "SEO works best when it is seen as a growth channel rather than a quick fix. A strong campaign can help your business rank for relevant searches, attract more qualified traffic, and build a stronger foundation for lead generation over time."
+        }
+      ],
+      "faqTitle": "SEO Pricing FAQs",
+      "faqs": [
+        {
+          "question": "How much does SEO cost in South Africa?",
+          "answer": "SEO pricing in South Africa varies depending on scope, competition, site size, and the level of ongoing work. Smaller campaigns usually cost less than larger, more competitive campaigns."
+        },
+        {
+          "question": "Why do SEO prices vary so much?",
+          "answer": "SEO prices vary because some projects need only basic optimisation, while others need technical work, content creation, link strategy, local SEO, and ongoing reporting."
+        },
+        {
+          "question": "Is cheap SEO worth it?",
+          "answer": "Cheap SEO can sometimes help with basic improvements, but very low-cost SEO often means limited strategy, weak execution, or poor-quality work that does not support long-term growth."
+        }
+      ],
+      "cta": {
+        "headline": "Need a Smarter SEO Strategy?",
+        "text": "Build stronger visibility, better rankings, and more consistent business enquiries.",
+        "buttonLabel": "Contact Us",
+        "buttonUrl": "https://marketingspecialists.co.za/contact"
+      },
+      "related": [
+        "/guides/how-seo-pages-bring-leads.html",
+        "/industries/digital-marketing-for-lawyers.html",
+        "/cities/seo-services-johannesburg.html"
+      ]
+    },
+    {
+      "type": "guide",
+      "path": "/guides/how-seo-pages-bring-leads.html",
+      "title": "How SEO Pages Bring Leads for Business Growth",
+      "metaDescription": "Learn how SEO pages can bring targeted traffic, improve visibility, support internal linking, and generate more business leads over time.",
+      "schemaType": "Article",
+      "eyebrow": "SEO Guide",
+      "heroImage": "https://images.unsplash.com/photo-1557838923-2985c318be48?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "Business team reviewing growth charts",
+      "intro": "SEO pages do more than fill up a website. When built properly, they become entry points for targeted traffic, internal linking power, and lead generation.",
+      "sections": [
+        {
+          "heading": "Why SEO pages matter",
+          "body": "Most small business websites rely too heavily on a few service pages. SEO pages expand your reach by targeting the questions, comparisons, and niche searches your audience is already making."
+        },
+        {
+          "heading": "How they attract better traffic",
+          "body": "A good SEO page is built around search intent. When someone lands on that page from Google, they are usually already interested in the topic, which makes them more valuable than random traffic."
+        },
+        {
+          "heading": "How they support your service pages",
+          "body": "Every guide, article, city page, or industry page can point readers toward your core money pages. This helps users move through your site naturally and strengthens the relationship between informational content and commercial pages."
+        },
+        {
+          "heading": "Why internal linking is powerful",
+          "body": "Internal links help Google understand your site structure and help readers discover the next relevant page. That is why an SEO page should not exist in isolation."
+        },
+        {
+          "heading": "How leads are created",
+          "body": "SEO traffic becomes lead generation when the page includes the right next step. That could be a free audit, a useful tool, a pricing page, or a contact form."
+        }
+      ],
+      "faqTitle": "SEO Lead Generation FAQs",
+      "faqs": [
+        {
+          "question": "Why do SEO pages generate leads?",
+          "answer": "SEO pages target specific search intent, which means they attract people who are already looking for answers, solutions, or services."
+        },
+        {
+          "question": "Can one article support service pages?",
+          "answer": "Yes. A strong article can pass attention and internal link value to related service pages, tool pages, and lead generation pages."
+        },
+        {
+          "question": "Do SEO pages need calls to action?",
+          "answer": "Yes. SEO pages should educate readers, but they should also guide them toward the next step, such as a service page, audit, contact page, or free tool."
+        }
+      ],
+      "cta": {
+        "headline": "Ready to Grow Your Online Presence?",
+        "text": "Looking for a digital marketing service that will grow your business?",
+        "buttonLabel": "Digital Marketing Services",
+        "buttonUrl": "https://marketingspecialists.co.za/digital-marketing-services"
+      },
+      "related": [
+        "/",
+        "/guides/google-ads-vs-seo-for-small-business.html",
+        "/industries/digital-marketing-for-lawyers.html"
+      ]
+    },
+    {
+      "type": "industry",
+      "path": "/industries/digital-marketing-for-lawyers.html",
+      "title": "Digital Marketing for Lawyers",
+      "metaDescription": "Learn how digital marketing for lawyers can improve visibility, generate enquiries, strengthen trust, and support long-term law firm growth.",
+      "schemaType": "Service",
+      "eyebrow": "Industry Page",
+      "heroImage": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "Legal documents and digital marketing planning",
+      "intro": "Law firms need more than a website. They need strong visibility, trust, authority, and a clear path that turns online interest into real enquiries.",
+      "sections": [
+        {
+          "heading": "Why this industry needs specialised marketing",
+          "body": "Legal services are built on trust. People searching for a lawyer are often dealing with something urgent, serious, or highly personal."
+        },
+        {
+          "heading": "What works best for law firms",
+          "body": "The strongest strategy usually combines SEO, content, paid search, and a website that clearly explains services."
+        },
+        {
+          "heading": "How SEO helps lawyers",
+          "body": "SEO helps law firms appear for specific searches related to legal services, locations, and questions potential clients ask before reaching out."
+        },
+        {
+          "heading": "Why content matters",
+          "body": "Content helps law firms explain complex topics clearly. It can answer questions, reduce uncertainty, and help a potential client feel more confident about making contact."
+        },
+        {
+          "heading": "Why internal linking matters",
+          "body": "An industry page like this should support your wider site by linking to service pages, SEO guides, and contact options."
+        }
+      ],
+      "faqTitle": "Law Firm Marketing FAQs",
+      "faqs": [
+        {
+          "question": "Why do lawyers need digital marketing?",
+          "answer": "Law firms need digital marketing because potential clients increasingly search online before making contact."
+        },
+        {
+          "question": "Can SEO help a law firm get more enquiries?",
+          "answer": "Yes. SEO can help a law firm appear in front of people searching for legal services, which can increase visibility and improve enquiry opportunities over time."
+        },
+        {
+          "question": "Should lawyers use both SEO and paid ads?",
+          "answer": "In many cases, yes. SEO helps with long-term visibility, while paid ads can help law firms generate attention faster."
+        }
+      ],
+      "cta": {
+        "headline": "Need Better Visibility for Your Legal Practice?",
+        "text": "Build trust, improve visibility, and generate stronger enquiries with a smarter digital strategy.",
+        "buttonLabel": "Contact Us",
+        "buttonUrl": "https://marketingspecialists.co.za/contact"
+      },
+      "related": [
+        "/guides/how-seo-pages-bring-leads.html",
+        "/",
+        "/guides/google-ads-vs-seo-for-small-business.html"
+      ]
+    },
+    {
+      "type": "city",
+      "path": "/cities/seo-services-johannesburg.html",
+      "title": "SEO Services Johannesburg",
+      "metaDescription": "Discover how SEO services in Johannesburg can improve visibility, attract qualified traffic, and help businesses generate stronger leads online.",
+      "schemaType": "Service",
+      "eyebrow": "City Page",
+      "heroImage": "https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=1400&q=80",
+      "heroAlt": "Johannesburg business SEO strategy and digital growth",
+      "intro": "Johannesburg is one of the most competitive business environments in South Africa. Strong SEO can help your business stand out, attract more relevant traffic, and convert search visibility into real enquiries.",
+      "sections": [
+        {
+          "heading": "Why Johannesburg businesses need SEO",
+          "body": "Businesses in Johannesburg compete in busy digital spaces where potential customers often compare several options before taking action."
+        },
+        {
+          "heading": "What good local SEO does",
+          "body": "Local SEO helps align your website with location-based intent. That means showing up for searches connected to your services and your city."
+        },
+        {
+          "heading": "How this supports lead generation",
+          "body": "A strong city page does more than mention a location. It connects search intent, services, trust, and clear next steps."
+        },
+        {
+          "heading": "Why internal links still matter",
+          "body": "A city page should not stand alone. It should point to your main service pages, key guides, and contact areas."
+        },
+        {
+          "heading": "What this kind of page helps you build",
+          "body": "Over time, pages like this help grow your site into a more complete SEO system."
+        }
+      ],
+      "faqTitle": "Johannesburg SEO FAQs",
+      "faqs": [
+        {
+          "question": "Why do Johannesburg businesses need SEO?",
+          "answer": "Johannesburg businesses need SEO because competition online is high and search visibility strongly influences who gets enquiries, traffic, and local attention."
+        },
+        {
+          "question": "Can local SEO help with more targeted leads?",
+          "answer": "Yes. Local SEO can help attract people searching for services in a specific city, which usually improves relevance and lead quality."
+        },
+        {
+          "question": "Should city pages link to service pages?",
+          "answer": "Yes. City pages work best when they support the main service pages and help users move naturally toward contact, pricing, or service information."
+        }
+      ],
+      "cta": {
+        "headline": "Need Better Visibility in Johannesburg?",
+        "text": "Strengthen your presence in search and turn more local traffic into business enquiries.",
+        "buttonLabel": "Contact Us",
+        "buttonUrl": "https://marketingspecialists.co.za/contact"
+      },
+      "related": [
+        "/guides/how-seo-pages-bring-leads.html",
+        "/industries/digital-marketing-for-lawyers.html",
+        "/"
+      ]
+    }
+  ]
+}

@@ -11,14 +11,19 @@ header {
   padding: 24px 50px;
 }
 
-header p {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+.site-logo {
+  display: inline-block;
+  margin-bottom: 18px;
+}
+
+.site-logo img {
+  width: 360px;
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 nav {
-  margin-top: 18px;
   display: flex;
   flex-wrap: wrap;
   gap: 22px;
@@ -192,6 +197,10 @@ footer p {
 @media (max-width: 900px) {
   header {
     padding: 20px 24px;
+  }
+
+  .site-logo img {
+    width: 260px;
   }
 
   main {

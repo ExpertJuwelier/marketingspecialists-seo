@@ -399,12 +399,8 @@ function renderServicePage(page, site) {
   </header>
 
   <main>
-    <article class="article-card">
-      <img class="hero-image" src="${escapeHtml(page.heroImage)}" alt="${escapeHtml(
-    page.heroAlt
-  )}">
-
-      <section class="article-content">
+    <section class="service-hero">
+      <div class="service-hero-inner">
         <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
         <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
         <p class="intro">${escapeHtml(page.heroText || "")}</p>
@@ -415,8 +411,8 @@ function renderServicePage(page, site) {
               )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
             : ""
         }
-      </section>
-    </article>
+      </div>
+    </section>
 
     ${renderInfoGrid(page.whyChooseTitle, page.whyChooseItems)}
     ${renderInfoGrid(page.servicesTitle, page.services)}

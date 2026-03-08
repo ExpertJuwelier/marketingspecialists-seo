@@ -1,0 +1,64 @@
+{
+  "type": "tool",
+  "path": "/tools/free-social-media-post-generator.html",
+  "title": "Free Social Media Post Generator | The Marketing Specialists",
+  "metaDescription": "Generate social media post ideas and supporting image prompts with a tool-first page layout designed for marketing use.",
+  "eyebrow": "Free Marketing Tool",
+  "heroTitle": "Free Social Media Post Generator",
+  "heroText": "Create social media post ideas faster with a clean tool-first layout designed to support visibility, consistency, and content planning.",
+  "heroButtonLabel": "Social Media Services",
+  "heroButtonUrl": "https://marketingspecialists.co.za/social-media-marketing-services",
+  "toolTitle": "AI Social Media Post Generator",
+  "toolIntro": "This is the tool layout for Cloudflare Pages. Later, this section can be replaced with your real embedded app or AI-powered generator interface.",
+  "toolFields": [
+    "Business type / niche",
+    "Platform",
+    "Post goal",
+    "Target audience",
+    "Tone of voice",
+    "Main topic or offer",
+    "Call to action"
+  ],
+  "supportTitle": "Why this tool matters",
+  "supportItems": [
+    {
+      "title": "Faster content planning",
+      "text": "Use the tool to reduce the time it takes to create platform-ready post ideas."
+    },
+    {
+      "title": "Better consistency",
+      "text": "A tool like this helps brands publish more regularly without starting from scratch every time."
+    },
+    {
+      "title": "Useful for strategy",
+      "text": "It can support brainstorming, campaign planning, and content repurposing."
+    }
+  ],
+  "ctaPanel": {
+    "headline": "Ready to Elevate Your Social Media Strategy?",
+    "text": "Use a smarter social media marketing and advice service to complement your content workflow.",
+    "buttonLabel": "Social Media Services",
+    "buttonUrl": "https://marketingspecialists.co.za/social-media-marketing-services"
+  },
+  "insightsTitle": "Related Insights",
+  "related": [
+    "/guides/google-ads-vs-seo-for-small-business.html",
+    "/guides/how-much-does-seo-cost-south-africa.html",
+    "/industries/digital-marketing-for-lawyers.html"
+  ],
+  "faqTitle": "Tool FAQs",
+  "faqs": [
+    {
+      "question": "Can this tool help with content ideas?",
+      "answer": "Yes. This type of tool is designed to help generate ideas faster and make content planning easier."
+    },
+    {
+      "question": "Can tools like this support marketing strategy?",
+      "answer": "Yes. A good content tool can support planning, consistency, testing, and faster execution."
+    },
+    {
+      "question": "Will this later connect to AI generation?",
+      "answer": "Yes. The goal is to connect this page type to a smarter AI-powered content workflow later."
+    }
+  ]
+}

@@ -1,3 +1,14 @@
 body {
-  background: white;
+  background: #f3f4f6;
+  font-family: Arial, sans-serif;
+  padding: 40px;
+}
+
+h1 {
+  color: #111827;
+}
+
+p {
+  color: #374151;
+  font-size: 18px;
 }

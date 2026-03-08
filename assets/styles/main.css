@@ -67,7 +67,8 @@ main {
 .article-card,
 .related-posts,
 .faq-section,
-.comments-section {
+.comments-section,
+.tool-shell {
   background: #ffffff;
   border-radius: 18px;
   margin-bottom: 24px;
@@ -77,7 +78,8 @@ main {
 .article-content,
 .related-posts,
 .faq-section,
-.comments-section {
+.comments-section,
+.tool-shell {
   padding: 28px;
 }
 
@@ -105,7 +107,7 @@ h1 {
 h2 {
   font-size: 18px;
   line-height: 1.35;
-  margin: 28px 0 12px;
+  margin: 0 0 12px;
 }
 
 h3 {
@@ -322,6 +324,70 @@ footer p {
   margin: 0 auto 24px;
 }
 
+/* Tool page hero */
+.tool-hero {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  padding: 48px 24px;
+  background: linear-gradient(180deg, #eefcfd 0%, #ffffff 100%);
+  border-radius: 0 0 24px 24px;
+  text-align: center;
+}
+
+.tool-hero-inner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.tool-hero .intro {
+  max-width: 720px;
+  margin: 0 auto 24px;
+}
+
+.tool-shell-header {
+  margin-bottom: 24px;
+}
+
+.tool-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.tool-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tool-field span {
+  font-size: 13px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tool-field input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  color: #111827;
+  background: #ffffff;
+}
+
+.tool-output {
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  padding: 20px;
+  background: #f9fafb;
+}
+
+.tool-output h3 {
+  margin-bottom: 10px;
+}
+
 @media (max-width: 900px) {
   .card-grid {
     grid-template-columns: 1fr;
@@ -330,6 +396,10 @@ footer p {
   .cta-strip {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .tool-form-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -344,11 +414,13 @@ footer p {
   .article-content,
   .related-posts,
   .faq-section,
-  .comments-section {
+  .comments-section,
+  .tool-shell {
     padding: 20px;
   }
 
-  .service-hero {
+  .service-hero,
+  .tool-hero {
     padding: 36px 18px;
     border-radius: 0 0 18px 18px;
   }

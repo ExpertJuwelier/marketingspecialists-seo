@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir, rm, cp } from "node:fs/promises";
+import { readFile, writeFile, mkdir, rm, cp, readdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -6,13 +6,46 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const ROOT = path.resolve(__dirname, "..");
 const DIST = path.join(ROOT, "dist");
-const DATA_FILE = path.join(ROOT, "content", "pages.json");
+const CONTENT_DIR = path.join(ROOT, "content");
 const ASSETS_SRC = path.join(ROOT, "assets");
 const SITE_URL = process.env.SITE_URL || "https://marketingspecialists-seo.pages.dev";
 
-const raw = await readFile(DATA_FILE, "utf8");
-const data = JSON.parse(raw);
+async function loadContent() {
+  const entries = await readdir(CONTENT_DIR, { withFileTypes: true });
 
+  let site = null;
+  const pages = [];
+
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
+
+    const fullPath = path.join(CONTENT_DIR, entry.name);
+    const raw = await readFile(fullPath, "utf8");
+    const json = JSON.parse(raw);
+
+    if (entry.name === "pages.json") {
+      if (json.site) site = json.site;
+      if (Array.isArray(json.pages)) pages.push(...json.pages);
+      continue;
+    }
+
+    if (json.site && !site) site = json.site;
+
+    if (Array.isArray(json.pages)) {
+      pages.push(...json.pages);
+    } else if (json.path) {
+      pages.push(json);
+    }
+  }
+
+  if (!site) {
+    throw new Error("No site configuration found in content/pages.json");
+  }
+
+  return { site, pages };
+}
+
+const data = await loadContent();
 const pagesByPath = new Map(data.pages.map((page) => [page.path, page]));
 
 await rm(DIST, { recursive: true, force: true });
@@ -60,7 +93,7 @@ function renderFooterLinks(site) {
 }
 
 function renderSections(page) {
-  return page.sections
+  return (page.sections || [])
     .map((section, index) => {
       const adBlock =
         index === 1
@@ -105,7 +138,7 @@ function renderRelated(page) {
 
   return `
     <section class="related-posts">
-      <h2>Read More Insights</h2>
+      <h2>${escapeHtml(page.insightsTitle || "Read More Insights")}</h2>
       <div class="card-grid">
         ${relatedPages
           .map(
@@ -126,18 +159,40 @@ function renderRelated(page) {
   `;
 }
 
-function renderCta(page) {
-  if (!page.cta) return "";
+function renderCta(cta) {
+  if (!cta) return "";
 
   return `
     <section class="cta-strip">
       <div>
-        <h2>${escapeHtml(page.cta.headline)}</h2>
-        <p>${escapeHtml(page.cta.text)}</p>
+        <h2>${escapeHtml(cta.headline)}</h2>
+        <p>${escapeHtml(cta.text)}</p>
       </div>
-      <a class="cta-button" href="${escapeHtml(page.cta.buttonUrl)}">${escapeHtml(
-    page.cta.buttonLabel
+      <a class="cta-button" href="${escapeHtml(cta.buttonUrl)}">${escapeHtml(
+    cta.buttonLabel
   )}</a>
+    </section>
+  `;
+}
+
+function renderInfoGrid(title, items = []) {
+  if (!items.length) return "";
+
+  return `
+    <section class="related-posts">
+      <h2>${escapeHtml(title)}</h2>
+      <div class="card-grid">
+        ${items
+          .map(
+            (item) => `
+              <article class="mini-card">
+                <h3>${escapeHtml(item.title)}</h3>
+                <p>${escapeHtml(item.text)}</p>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
     </section>
   `;
 }
@@ -192,7 +247,7 @@ function buildPrimarySchema(page, site) {
     };
   }
 
-  if (page.type === "industry" || page.type === "city") {
+  if (page.type === "industry" || page.type === "city" || page.type === "service") {
     return {
       "@context": "https://schema.org",
       "@type": "Service",
@@ -259,7 +314,7 @@ ${JSON.stringify(schema, null, 2)}
     .join("");
 }
 
-function renderPage(page, site) {
+function renderGenericPage(page, site) {
   const isHub = page.type === "hub";
 
   return `<!doctype html>
@@ -309,7 +364,7 @@ function renderPage(page, site) {
 
     ${renderRelated(page)}
     ${renderFaqs(page)}
-    ${renderCta(page)}
+    ${renderCta(page.cta)}
   </main>
 
   <footer>
@@ -320,6 +375,72 @@ function renderPage(page, site) {
   </footer>
 </body>
 </html>`;
+}
+
+function renderServicePage(page, site) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(page.title)}</title>
+  <meta name="description" content="${escapeHtml(page.metaDescription)}">
+  <link rel="stylesheet" href="/assets/styles/main.css">
+  ${renderSchemaScripts(page, site)}
+</head>
+<body>
+  <header>
+    <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
+      <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
+    </a>
+
+    <nav>
+      ${renderNav(site)}
+    </nav>
+  </header>
+
+  <main>
+    <article class="article-card">
+      <img class="hero-image" src="${escapeHtml(page.heroImage)}" alt="${escapeHtml(
+    page.heroAlt
+  )}">
+
+      <section class="article-content">
+        <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
+        <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
+        <p class="intro">${escapeHtml(page.heroText || "")}</p>
+        ${
+          page.heroButtonLabel && page.heroButtonUrl
+            ? `<p><a class="cta-button" href="${escapeHtml(
+                page.heroButtonUrl
+              )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
+            : ""
+        }
+      </section>
+    </article>
+
+    ${renderInfoGrid(page.whyChooseTitle, page.whyChooseItems)}
+    ${renderInfoGrid(page.servicesTitle, page.services)}
+    ${renderCta(page.ctaPanel)}
+    ${renderRelated(page)}
+    ${renderFaqs(page)}
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      ${renderFooterLinks(site)}
+    </div>
+    <p>© ${escapeHtml(site.name)}</p>
+  </footer>
+</body>
+</html>`;
+}
+
+function renderPage(page, site) {
+  if (page.type === "service") {
+    return renderServicePage(page, site);
+  }
+
+  return renderGenericPage(page, site);
 }
 
 for (const page of data.pages) {

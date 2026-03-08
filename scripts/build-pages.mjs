@@ -144,8 +144,8 @@ function renderRelated(page) {
           .map(
             (related) => `
               <article class="mini-card">
-                <img src="${escapeHtml(related.heroImage)}" alt="${escapeHtml(
-              related.heroAlt
+                <img src="${escapeHtml(related.heroImage || data.site.logoUrl)}" alt="${escapeHtml(
+              related.heroAlt || related.title
             )}">
                 <h3>${escapeHtml(related.title)}</h3>
                 <p>${escapeHtml(truncate(related.metaDescription, 110))}</p>
@@ -194,6 +194,25 @@ function renderInfoGrid(title, items = []) {
           .join("")}
       </div>
     </section>
+  `;
+}
+
+function renderToolFields(fields = []) {
+  if (!fields.length) return "";
+
+  return `
+    <div class="tool-form-grid">
+      ${fields
+        .map(
+          (field) => `
+            <label class="tool-field">
+              <span>${escapeHtml(field)}</span>
+              <input type="text" placeholder="${escapeHtml(field)}">
+            </label>
+          `
+        )
+        .join("")}
+    </div>
   `;
 }
 
@@ -269,6 +288,22 @@ function buildPrimarySchema(page, site) {
               "@type": "Country",
               name: "South Africa"
             }
+    };
+  }
+
+  if (page.type === "tool") {
+    return {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      name: page.title,
+      description: page.metaDescription,
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      url: pathToUrl(page.path),
+      publisher: {
+        "@type": "Organization",
+        name: site.name
+      }
     };
   }
 
@@ -431,9 +466,80 @@ function renderServicePage(page, site) {
 </html>`;
 }
 
+function renderToolPage(page, site) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(page.title)}</title>
+  <meta name="description" content="${escapeHtml(page.metaDescription)}">
+  <link rel="stylesheet" href="/assets/styles/main.css">
+  ${renderSchemaScripts(page, site)}
+</head>
+<body>
+  <header>
+    <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
+      <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
+    </a>
+
+    <nav>
+      ${renderNav(site)}
+    </nav>
+  </header>
+
+  <main>
+    <section class="tool-hero">
+      <div class="tool-hero-inner">
+        <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
+        <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
+        <p class="intro">${escapeHtml(page.heroText || "")}</p>
+        ${
+          page.heroButtonLabel && page.heroButtonUrl
+            ? `<p><a class="cta-button" href="${escapeHtml(
+                page.heroButtonUrl
+              )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
+            : ""
+        }
+      </div>
+    </section>
+
+    <section class="tool-shell">
+      <div class="tool-shell-header">
+        <h2>${escapeHtml(page.toolTitle || page.title)}</h2>
+        <p>${escapeHtml(page.toolIntro || "")}</p>
+      </div>
+
+      ${renderToolFields(page.toolFields)}
+
+      <div class="tool-output">
+        <h3>Generated output</h3>
+        <p>This area is reserved for the live AI-assisted output. Later, your Cloudflare Worker with AI binding can populate this section dynamically.</p>
+      </div>
+    </section>
+
+    ${renderInfoGrid(page.supportTitle, page.supportItems)}
+    ${renderCta(page.ctaPanel)}
+    ${renderRelated(page)}
+    ${renderFaqs(page)}
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      ${renderFooterLinks(site)}
+    </div>
+    <p>© ${escapeHtml(site.name)}</p>
+  </footer>
+</body>
+</html>`;
+}
+
 function renderPage(page, site) {
   if (page.type === "service") {
     return renderServicePage(page, site);
+  }
+
+  if (page.type === "tool") {
+    return renderToolPage(page, site);
   }
 
   return renderGenericPage(page, site);

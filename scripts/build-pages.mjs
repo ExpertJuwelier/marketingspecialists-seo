@@ -787,4 +787,4 @@ ${data.pages
 await writeFile(path.join(DIST, "sitemap.xml"), sitemap, "utf8");
 await writeFile(path.join(DIST, "robots.txt"), `User-agent: *\nAllow: /\n`, "utf8");
 
-console.log(\`Generated \${data.pages.length} pages into dist/\`);
+console.log(`Generated ${data.pages.length} pages into dist/`);

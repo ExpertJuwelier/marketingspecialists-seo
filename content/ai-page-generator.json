@@ -1,0 +1,56 @@
+{
+  "type": "tool",
+  "generatorMode": "seo-page-generator",
+  "path": "/tools/ai-seo-page-generator.html",
+  "title": "AI SEO Page Generator | The Marketing Specialists",
+  "metaDescription": "Generate structured JSON drafts for SEO guides, service pages, city pages, and industry pages using AI.",
+  "eyebrow": "AI Page Generator",
+  "heroTitle": "AI SEO Page Generator",
+  "heroText": "Generate structured JSON drafts for guide, service, city, and industry pages using your keyword focus, search intent, and CTA strategy.",
+  "heroButtonLabel": "Digital Marketing Services",
+  "heroButtonUrl": "https://marketingspecialists.co.za/digital-marketing-services",
+  "toolTitle": "Generate structured page data",
+  "toolIntro": "This tool generates JSON drafts for your Cloudflare SEO system. It is designed to create richer page content into your content data structure, not raw HTML.",
+  "supportTitle": "Why this tool matters",
+  "supportItems": [
+    {
+      "title": "Faster page creation",
+      "text": "Generate structured drafts for multiple page types without starting from a blank page every time."
+    },
+    {
+      "title": "Better content consistency",
+      "text": "Keep titles, meta descriptions, sections, FAQs, CTAs, and schema-ready fields aligned across your system."
+    },
+    {
+      "title": "Built for scale",
+      "text": "This creates draft content in the same structure your Cloudflare publishing engine already understands."
+    }
+  ],
+  "ctaPanel": {
+    "headline": "Need Strategy Behind the Content?",
+    "text": "Use your content system together with a smarter digital marketing strategy.",
+    "buttonLabel": "Contact Us",
+    "buttonUrl": "https://marketingspecialists.co.za/contact"
+  },
+  "insightsTitle": "Related Insights",
+  "related": [
+    "/guides/google-ads-vs-seo-for-small-business.html",
+    "/guides/how-much-does-seo-cost-south-africa.html",
+    "/industries/digital-marketing-for-lawyers.html"
+  ],
+  "faqTitle": "AI Generator FAQs",
+  "faqs": [
+    {
+      "question": "Does this publish pages automatically?",
+      "answer": "Not yet. This stage generates structured JSON drafts that fit your publishing system. Auto-saving and publishing can come next."
+    },
+    {
+      "question": "Can this generate different page types?",
+      "answer": "Yes. This generator is built to create guides, service pages, city pages, and industry pages."
+    },
+    {
+      "question": "Will this use the project’s SEO rules?",
+      "answer": "Yes. The generation prompt is shaped around your SEO structure, page data model, and conversion-focused content goals."
+    }
+  ]
+}

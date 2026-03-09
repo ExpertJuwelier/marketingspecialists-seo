@@ -466,7 +466,7 @@ function renderServicePage(page, site) {
 </html>`;
 }
 
-function renderToolPage(page, site) {
+function renderGenericToolPage(page, site) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -533,6 +533,222 @@ function renderToolPage(page, site) {
 </html>`;
 }
 
+function renderAiGeneratorToolPage(page, site) {
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>${escapeHtml(page.title)}</title>
+  <meta name="description" content="${escapeHtml(page.metaDescription)}">
+  <link rel="stylesheet" href="/assets/styles/main.css">
+  ${renderSchemaScripts(page, site)}
+</head>
+<body>
+  <header>
+    <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
+      <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
+    </a>
+
+    <nav>
+      ${renderNav(site)}
+    </nav>
+  </header>
+
+  <main>
+    <section class="tool-hero">
+      <div class="tool-hero-inner">
+        <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
+        <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
+        <p class="intro">${escapeHtml(page.heroText || "")}</p>
+        ${
+          page.heroButtonLabel && page.heroButtonUrl
+            ? `<p><a class="cta-button" href="${escapeHtml(
+                page.heroButtonUrl
+              )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
+            : ""
+        }
+      </div>
+    </section>
+
+    <section class="tool-shell ai-generator-shell">
+      <div class="tool-shell-header">
+        <h2>${escapeHtml(page.toolTitle || page.title)}</h2>
+        <p>${escapeHtml(page.toolIntro || "")}</p>
+      </div>
+
+      <form id="ai-page-generator-form" class="generator-form">
+        <div class="generator-grid">
+          <label class="generator-field">
+            <span>Page type</span>
+            <select name="pageType">
+              <option value="guide">Guide</option>
+              <option value="service">Service</option>
+              <option value="city">City</option>
+              <option value="industry">Industry</option>
+            </select>
+          </label>
+
+          <label class="generator-field">
+            <span>Topic</span>
+            <input type="text" name="topic" placeholder="Example: SEO for dentists in Cape Town" required>
+          </label>
+
+          <label class="generator-field">
+            <span>Primary keyword</span>
+            <input type="text" name="primaryKeyword" placeholder="Example: SEO for dentists Cape Town">
+          </label>
+
+          <label class="generator-field">
+            <span>Search intent</span>
+            <input type="text" name="searchIntent" placeholder="Example: Commercial investigation">
+          </label>
+
+          <label class="generator-field">
+            <span>Audience</span>
+            <input type="text" name="audience" placeholder="Example: Small business owners">
+          </label>
+
+          <label class="generator-field">
+            <span>City</span>
+            <input type="text" name="city" placeholder="Example: Johannesburg">
+          </label>
+
+          <label class="generator-field">
+            <span>Industry</span>
+            <input type="text" name="industry" placeholder="Example: Legal services">
+          </label>
+
+          <label class="generator-field">
+            <span>CTA label</span>
+            <input type="text" name="ctaLabel" placeholder="Example: Contact Us">
+          </label>
+
+          <label class="generator-field generator-field--full">
+            <span>Secondary keywords</span>
+            <textarea name="secondaryKeywords" rows="4" placeholder="Enter secondary keywords separated by commas or line breaks"></textarea>
+          </label>
+
+          <label class="generator-field generator-field--full">
+            <span>Extra instructions</span>
+            <textarea name="extraInstructions" rows="5" placeholder="Add any extra direction for tone, structure, angles, local context, conversion goals, or internal linking ideas"></textarea>
+          </label>
+
+          <label class="generator-field generator-field--full">
+            <span>CTA URL</span>
+            <input type="text" name="ctaUrl" placeholder="https://marketingspecialists.co.za/contact">
+          </label>
+        </div>
+
+        <div class="generator-actions">
+          <button type="submit" class="cta-button" id="ai-generator-submit">Generate JSON Draft</button>
+          <button type="button" class="secondary-button" id="ai-generator-copy">Copy Output</button>
+        </div>
+
+        <p class="generator-note">This creates structured draft data for your Cloudflare content system. It does not commit into Git automatically yet.</p>
+
+        <label class="generator-output-wrap">
+          <span>Generated JSON draft</span>
+          <textarea id="ai-generator-output" rows="22" placeholder="Your generated page data will appear here..."></textarea>
+        </label>
+      </form>
+    </section>
+
+    ${renderInfoGrid(page.supportTitle, page.supportItems)}
+    ${renderCta(page.ctaPanel)}
+    ${renderRelated(page)}
+    ${renderFaqs(page)}
+
+    <script>
+      (() => {
+        const form = document.getElementById("ai-page-generator-form");
+        const output = document.getElementById("ai-generator-output");
+        const submitButton = document.getElementById("ai-generator-submit");
+        const copyButton = document.getElementById("ai-generator-copy");
+
+        if (!form || !output || !submitButton || !copyButton) return;
+
+        form.addEventListener("submit", async (event) => {
+          event.preventDefault();
+
+          const formData = new FormData(form);
+          const payload = {
+            pageType: formData.get("pageType") || "guide",
+            topic: formData.get("topic") || "",
+            primaryKeyword: formData.get("primaryKeyword") || "",
+            secondaryKeywords: formData.get("secondaryKeywords") || "",
+            searchIntent: formData.get("searchIntent") || "",
+            audience: formData.get("audience") || "",
+            city: formData.get("city") || "",
+            industry: formData.get("industry") || "",
+            ctaLabel: formData.get("ctaLabel") || "",
+            ctaUrl: formData.get("ctaUrl") || "",
+            extraInstructions: formData.get("extraInstructions") || ""
+          };
+
+          output.value = "Generating draft...";
+          submitButton.disabled = true;
+          submitButton.textContent = "Generating...";
+
+          try {
+            const response = await fetch("/api/generate-page", {
+              method: "POST",
+              headers: {
+                "content-type": "application/json"
+              },
+              body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (!response.ok || !result.ok) {
+              throw new Error(result.error || "Generation failed.");
+            }
+
+            output.value = JSON.stringify(result.draft, null, 2);
+          } catch (error) {
+            output.value = "Error: " + (error.message || "Generation failed.");
+          } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Generate JSON Draft";
+          }
+        });
+
+        copyButton.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(output.value || "");
+            copyButton.textContent = "Copied";
+            setTimeout(() => {
+              copyButton.textContent = "Copy Output";
+            }, 1200);
+          } catch {
+            copyButton.textContent = "Copy failed";
+            setTimeout(() => {
+              copyButton.textContent = "Copy Output";
+            }, 1200);
+          }
+        });
+      })();
+    </script>
+  </main>
+
+  <footer>
+    <div class="footer-links">
+      ${renderFooterLinks(site)}
+    </div>
+    <p>© ${escapeHtml(site.name)}</p>
+  </footer>
+</body>
+</html>`;
+}
+
+function renderToolPage(page, site) {
+  if (page.generatorMode === "seo-page-generator") {
+    return renderAiGeneratorToolPage(page, site);
+  }
+
+  return renderGenericToolPage(page, site);
+}
+
 function renderPage(page, site) {
   if (page.type === "service") {
     return renderServicePage(page, site);
@@ -571,4 +787,4 @@ ${data.pages
 await writeFile(path.join(DIST, "sitemap.xml"), sitemap, "utf8");
 await writeFile(path.join(DIST, "robots.txt"), `User-agent: *\nAllow: /\n`, "utf8");
 
-console.log(`Generated ${data.pages.length} pages into dist/`);
+console.log(\`Generated \${data.pages.length} pages into dist/\`);

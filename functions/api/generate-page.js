@@ -5,16 +5,6 @@ const JSON_HEADERS = {
   "access-control-allow-headers": "content-type"
 };
 
-function slugify(value = "") {
-  return String(value)
-    .toLowerCase()
-    .trim()
-    .replace(/['’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .replace(/-{2,}/g, "-");
-}
-
 function cleanString(value = "") {
   return String(value || "").trim();
 }
@@ -23,13 +13,19 @@ function ensureArray(value, fallback = []) {
   return Array.isArray(value) ? value : fallback;
 }
 
-function isLikelyUrl(value = "") {
-  return /^https?:\/\//i.test(cleanString(value));
-}
-
 function normaliseType(value = "") {
   const allowed = new Set(["guide", "service", "city", "industry"]);
   return allowed.has(value) ? value : "guide";
+}
+
+function slugify(value = "") {
+  return String(value)
+    .toLowerCase()
+    .trim()
+    .replace(/['’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .replace(/-{2,}/g, "-");
 }
 
 function defaultPathForType(pageType, slug) {
@@ -60,15 +56,9 @@ function defaultHeroImage(pageType) {
 }
 
 function defaultHeroAlt(pageType, topic, city, industry) {
-  if (pageType === "service") {
-    return `${topic} digital marketing and business growth`;
-  }
-  if (pageType === "city") {
-    return `${topic} in ${city || "this city"} and local business growth`;
-  }
-  if (pageType === "industry") {
-    return `${topic} for ${industry || "this industry"} and marketing strategy`;
-  }
+  if (pageType === "service") return `${topic} digital marketing and business growth`;
+  if (pageType === "city") return `${topic} in ${city || "this city"} and local business growth`;
+  if (pageType === "industry") return `${topic} for ${industry || "this industry"} and marketing strategy`;
   return `${topic} SEO strategy and planning`;
 }
 
@@ -178,30 +168,28 @@ function sanitiseExternalLinks(value) {
       anchor: cleanString(item?.anchor || ""),
       url: cleanString(item?.url || "")
     }))
-    .filter((item) => item.anchor && isLikelyUrl(item.url))
+    .filter((item) => item.anchor && /^https?:\/\//i.test(item.url))
     .slice(0, 6);
 }
 
 function coerceSections(value, minCount = 6, maxCount = 8) {
-  const sections = ensureArray(value, [])
+  return ensureArray(value, [])
     .map((item) => ({
       heading: cleanString(item?.heading || ""),
       body: cleanString(item?.body || "")
     }))
-    .filter((item) => item.heading && item.body);
-
-  return sections.slice(0, maxCount);
+    .filter((item) => item.heading && item.body)
+    .slice(0, maxCount);
 }
 
 function coerceFaqs(value, minCount = 4, maxCount = 5) {
-  const faqs = ensureArray(value, [])
+  return ensureArray(value, [])
     .map((item) => ({
       question: cleanString(item?.question || ""),
       answer: cleanString(item?.answer || "")
     }))
-    .filter((item) => item.question && item.answer);
-
-  return faqs.slice(0, maxCount);
+    .filter((item) => item.question && item.answer)
+    .slice(0, maxCount);
 }
 
 function coerceInfoItems(value, maxCount = 4) {
@@ -305,13 +293,161 @@ function fallbackServiceItems(input) {
   ];
 }
 
-function extractJson(text = "") {
-  const first = text.indexOf("{");
-  const last = text.lastIndexOf("}");
-  if (first === -1 || last === -1 || last <= first) {
-    throw new Error("Model did not return a JSON object.");
-  }
-  return text.slice(first, last + 1);
+function buildGuideSchema() {
+  return {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      metaDescription: { type: "string" },
+      intro: { type: "string" },
+      sections: {
+        type: "array",
+        minItems: 6,
+        maxItems: 8,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            heading: { type: "string" },
+            body: { type: "string" }
+          },
+          required: ["heading", "body"]
+        }
+      },
+      faqTitle: { type: "string" },
+      faqs: {
+        type: "array",
+        minItems: 4,
+        maxItems: 5,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            question: { type: "string" },
+            answer: { type: "string" }
+          },
+          required: ["question", "answer"]
+        }
+      },
+      cta: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          headline: { type: "string" },
+          text: { type: "string" }
+        },
+        required: ["headline", "text"]
+      },
+      externalLinks: {
+        type: "array",
+        maxItems: 6,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            anchor: { type: "string" },
+            url: { type: "string" }
+          },
+          required: ["anchor", "url"]
+        }
+      }
+    },
+    required: ["title", "metaDescription", "intro", "sections", "faqTitle", "faqs", "cta"]
+  };
+}
+
+function buildServiceSchema() {
+  return {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      title: { type: "string" },
+      metaDescription: { type: "string" },
+      heroTitle: { type: "string" },
+      heroText: { type: "string" },
+      whyChooseTitle: { type: "string" },
+      whyChooseItems: {
+        type: "array",
+        minItems: 4,
+        maxItems: 4,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            title: { type: "string" },
+            text: { type: "string" }
+          },
+          required: ["title", "text"]
+        }
+      },
+      servicesTitle: { type: "string" },
+      services: {
+        type: "array",
+        minItems: 4,
+        maxItems: 4,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            title: { type: "string" },
+            text: { type: "string" }
+          },
+          required: ["title", "text"]
+        }
+      },
+      ctaPanel: {
+        type: "object",
+        additionalProperties: false,
+        properties: {
+          headline: { type: "string" },
+          text: { type: "string" }
+        },
+        required: ["headline", "text"]
+      },
+      faqTitle: { type: "string" },
+      faqs: {
+        type: "array",
+        minItems: 4,
+        maxItems: 4,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            question: { type: "string" },
+            answer: { type: "string" }
+          },
+          required: ["question", "answer"]
+        }
+      },
+      externalLinks: {
+        type: "array",
+        maxItems: 6,
+        items: {
+          type: "object",
+          additionalProperties: false,
+          properties: {
+            anchor: { type: "string" },
+            url: { type: "string" }
+          },
+          required: ["anchor", "url"]
+        }
+      }
+    },
+    required: [
+      "title",
+      "metaDescription",
+      "heroTitle",
+      "heroText",
+      "whyChooseTitle",
+      "whyChooseItems",
+      "servicesTitle",
+      "services",
+      "ctaPanel",
+      "faqTitle",
+      "faqs"
+    ]
+  };
 }
 
 function buildPromptForType(input) {
@@ -348,7 +484,6 @@ Use these rules like a bible:
 - Make FAQs realistic.
 - Do not invent statistics, awards, or credentials.
 - Do not hallucinate facts.
-- Return valid JSON only.
 
 Target audience: ${audience}
 Focus keyword: ${primaryKeyword}
@@ -379,43 +514,6 @@ Service page rules:
 - The copy should help a business owner make a better decision.
 - Avoid sounding salesy for the sake of it.
 - The content must feel publishable.
-
-Return exactly this JSON shape:
-{
-  "title": "string",
-  "metaDescription": "string",
-  "heroTitle": "string",
-  "heroText": "string",
-  "whyChooseTitle": "string",
-  "whyChooseItems": [
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" }
-  ],
-  "servicesTitle": "string",
-  "services": [
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" }
-  ],
-  "ctaPanel": {
-    "headline": "string",
-    "text": "string"
-  },
-  "faqTitle": "string",
-  "faqs": [
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" }
-  ],
-  "externalLinks": [
-    { "anchor": "string", "url": "string" },
-    { "anchor": "string", "url": "string" }
-  ]
-}
 `;
   }
 
@@ -452,118 +550,7 @@ Guide-like page rules:
 - Make the page feel like a strong long-form SEO draft.
 - FAQs should feel realistic.
 - The CTA should feel contextually relevant.
-
-Return exactly this JSON shape:
-{
-  "title": "string",
-  "metaDescription": "string",
-  "intro": "string",
-  "sections": [
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" },
-    { "heading": "string", "body": "string" }
-  ],
-  "faqTitle": "string",
-  "faqs": [
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" }
-  ],
-  "cta": {
-    "headline": "string",
-    "text": "string"
-  },
-  "externalLinks": [
-    { "anchor": "string", "url": "string" },
-    { "anchor": "string", "url": "string" }
-  ]
-}
 `;
-}
-
-async function runModel(ai, prompt, strictMode = false) {
-  const systemPrompt = strictMode
-    ? "You are an elite SEO strategist and commercial content architect. Return valid JSON only. No markdown. No notes. No commentary."
-    : "You are a high-level SEO strategist. Return valid JSON only.";
-
-  return ai.run("@cf/meta/llama-3.1-8b-instruct-fast", {
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: prompt }
-    ],
-    max_tokens: 4000,
-    temperature: strictMode ? 0.12 : 0.18
-  });
-}
-
-function validateParsed(parsed, pageType) {
-  if (!parsed || typeof parsed !== "object") {
-    throw new Error("Model output is not a JSON object.");
-  }
-
-  if (pageType === "service") {
-    if (!cleanString(parsed.title)) throw new Error("Missing service title.");
-    if (!cleanString(parsed.metaDescription)) throw new Error("Missing service meta description.");
-    if (!cleanString(parsed.heroTitle)) throw new Error("Missing service heroTitle.");
-    if (!cleanString(parsed.heroText)) throw new Error("Missing service heroText.");
-    if (coerceInfoItems(parsed.whyChooseItems, 4).length < 3) {
-      throw new Error("Missing enough whyChooseItems.");
-    }
-    if (coerceInfoItems(parsed.services, 4).length < 3) {
-      throw new Error("Missing enough service items.");
-    }
-    if (coerceFaqs(parsed.faqs, 4, 4).length < 3) {
-      throw new Error("Missing enough service FAQs.");
-    }
-    return;
-  }
-
-  if (!cleanString(parsed.title)) throw new Error("Missing page title.");
-  if (!cleanString(parsed.metaDescription)) throw new Error("Missing meta description.");
-  if (!cleanString(parsed.intro)) throw new Error("Missing intro.");
-  if (coerceSections(parsed.sections, 6, 8).length < 6) {
-    throw new Error("Missing enough sections.");
-  }
-  if (coerceFaqs(parsed.faqs, 4, 5).length < 3) {
-    throw new Error("Missing enough FAQs.");
-  }
-}
-
-async function generateStructuredDraft(ai, input) {
-  const pageType = normaliseType(input.pageType);
-  const prompt = buildPromptForType(input);
-
-  const first = await runModel(ai, prompt, false);
-  const firstText = first?.response || "";
-  let parsed;
-
-  try {
-    parsed = JSON.parse(extractJson(firstText));
-    validateParsed(parsed, pageType);
-    return parsed;
-  } catch {
-    const retryPrompt = `${prompt}
-
-Your previous attempt failed validation.
-Try again and obey the schema exactly.
-Do not include forbidden fields.
-Do not choose the page type or path.
-Do not return placeholders.
-Return JSON only.`;
-
-    const second = await runModel(ai, retryPrompt, true);
-    const secondText = second?.response || "";
-    parsed = JSON.parse(extractJson(secondText));
-    validateParsed(parsed, pageType);
-    return parsed;
-  }
 }
 
 function buildFinalDraft(parsed, input) {
@@ -742,10 +729,37 @@ export async function onRequestPost(context) {
       );
     }
 
-    const parsed = await generateStructuredDraft(context.env.AI, {
+    const prompt = buildPromptForType({
       ...input,
       pageType
     });
+
+    const schema = pageType === "service" ? buildServiceSchema() : buildGuideSchema();
+
+    const result = await context.env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast", {
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are an elite SEO strategist and commercial content architect. Return only the JSON object defined by the schema."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      response_format: {
+        type: "json_schema",
+        json_schema: schema
+      },
+      max_tokens: 4000,
+      temperature: 0.12
+    });
+
+    const parsed =
+      result && typeof result.response === "object"
+        ? result.response
+        : JSON.parse(typeof result.response === "string" ? result.response : "{}");
 
     const draft = buildFinalDraft(parsed, {
       ...input,

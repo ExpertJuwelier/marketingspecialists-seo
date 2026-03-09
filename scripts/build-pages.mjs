@@ -94,18 +94,12 @@ function renderFooterLinks(site) {
 
 function renderSections(page) {
   return (page.sections || [])
-    .map((section, index) => {
-      const adBlock =
-        index === 1
-          ? `<div class="ad-space">Google Ad Space</div>`
-          : "";
-
-      return `
+    .map(
+      (section) => `
         <h2>${escapeHtml(section.heading)}</h2>
         <p>${escapeHtml(section.body)}</p>
-        ${adBlock}
-      `;
-    })
+      `
+    )
     .join("");
 }
 
@@ -144,9 +138,13 @@ function renderRelated(page) {
           .map(
             (related) => `
               <article class="mini-card">
-                <img src="${escapeHtml(related.heroImage || data.site.logoUrl)}" alt="${escapeHtml(
-              related.heroAlt || related.title
-            )}">
+                ${
+                  related.heroImage
+                    ? `<img src="${escapeHtml(related.heroImage)}" alt="${escapeHtml(
+                        related.heroAlt || related.title
+                      )}">`
+                    : ""
+                }
                 <h3>${escapeHtml(related.title)}</h3>
                 <p>${escapeHtml(truncate(related.metaDescription, 110))}</p>
                 <a href="${escapeHtml(related.path)}">Read More</a>
@@ -186,8 +184,22 @@ function renderInfoGrid(title, items = []) {
           .map(
             (item) => `
               <article class="mini-card">
+                ${
+                  item.image
+                    ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(
+                        item.alt || item.title
+                      )}">`
+                    : ""
+                }
                 <h3>${escapeHtml(item.title)}</h3>
-                <p>${escapeHtml(item.text)}</p>
+                <p>${escapeHtml(item.text || "")}</p>
+                ${
+                  item.url
+                    ? `<a href="${escapeHtml(item.url)}">${escapeHtml(
+                        item.buttonLabel || "Learn More"
+                      )}</a>`
+                    : ""
+                }
               </article>
             `
           )
@@ -197,22 +209,64 @@ function renderInfoGrid(title, items = []) {
   `;
 }
 
-function renderToolFields(fields = []) {
-  if (!fields.length) return "";
+function renderMonetisationBlock(page) {
+  if (!page.monetisationLinks?.length) return "";
 
   return `
-    <div class="tool-form-grid">
-      ${fields
-        .map(
-          (field) => `
-            <label class="tool-field">
-              <span>${escapeHtml(field)}</span>
-              <input type="text" placeholder="${escapeHtml(field)}">
-            </label>
-          `
-        )
-        .join("")}
-    </div>
+    <section class="related-posts">
+      <h2>${escapeHtml(page.monetisationTitle || "Recommended Offers")}</h2>
+      <div class="card-grid">
+        ${page.monetisationLinks
+          .map(
+            (item) => `
+              <article class="mini-card">
+                ${
+                  item.image
+                    ? `<img src="${escapeHtml(item.image)}" alt="${escapeHtml(
+                        item.alt || item.title
+                      )}">`
+                    : ""
+                }
+                <h3>${escapeHtml(item.title)}</h3>
+                <p>${escapeHtml(item.text || "")}</p>
+                <a href="${escapeHtml(item.url)}">${escapeHtml(
+              item.buttonLabel || "View Offer"
+            )}</a>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
+  `;
+}
+
+function renderLinksBlock(title, links = [], isExternal = false) {
+  if (!links.length) return "";
+
+  return `
+    <section class="related-posts">
+      <h2>${escapeHtml(title)}</h2>
+      <div class="card-grid">
+        ${links
+          .map(
+            (item) => `
+              <article class="mini-card">
+                <h3>${escapeHtml(item.anchor)}</h3>
+                <p>${escapeHtml(
+                  isExternal
+                    ? "Authoritative external resource"
+                    : "Relevant internal resource"
+                )}</p>
+                <a href="${escapeHtml(
+                  isExternal ? item.url : item.path
+                )}">${escapeHtml(item.anchor)}</a>
+              </article>
+            `
+          )
+          .join("")}
+      </div>
+    </section>
   `;
 }
 
@@ -232,21 +286,17 @@ function buildPrimarySchema(page, site) {
           "@type": "ImageObject",
           url: site.logoUrl
         }
-      },
-      hasPart: (page.related || []).map((relatedPath) => ({
-        "@type": "WebPage",
-        url: pathToUrl(relatedPath)
-      }))
+      }
     };
   }
 
-  if (page.type === "guide") {
+  if (page.type === "guide" || page.type === "city" || page.type === "industry") {
     return {
       "@context": "https://schema.org",
       "@type": "Article",
       headline: page.title,
       description: page.metaDescription,
-      image: [page.heroImage],
+      image: page.heroImage ? [page.heroImage] : [],
       author: {
         "@type": "Organization",
         name: site.name
@@ -266,7 +316,7 @@ function buildPrimarySchema(page, site) {
     };
   }
 
-  if (page.type === "industry" || page.type === "city" || page.type === "service") {
+  if (page.type === "service") {
     return {
       "@context": "https://schema.org",
       "@type": "Service",
@@ -277,33 +327,7 @@ function buildPrimarySchema(page, site) {
         name: site.name,
         url: "https://marketingspecialists.co.za"
       },
-      serviceType: page.title,
-      areaServed:
-        page.type === "city"
-          ? {
-              "@type": "Place",
-              name: page.title
-            }
-          : {
-              "@type": "Country",
-              name: "South Africa"
-            }
-    };
-  }
-
-  if (page.type === "tool") {
-    return {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      name: page.title,
-      description: page.metaDescription,
-      applicationCategory: "BusinessApplication",
-      operatingSystem: "Web",
-      url: pathToUrl(page.path),
-      publisher: {
-        "@type": "Organization",
-        name: site.name
-      }
+      serviceType: page.title
     };
   }
 
@@ -366,46 +390,46 @@ function renderGenericPage(page, site) {
     <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
       <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
     </a>
-
-    <nav>
-      ${renderNav(site)}
-    </nav>
+    <nav>${renderNav(site)}</nav>
   </header>
 
   <main>
     <article class="article-card">
-      <img class="hero-image" src="${escapeHtml(page.heroImage)}" alt="${escapeHtml(
-    page.heroAlt
-  )}">
+      ${
+        page.heroImage
+          ? `<img class="hero-image" src="${escapeHtml(page.heroImage)}" alt="${escapeHtml(
+              page.heroAlt || page.title
+            )}">`
+          : ""
+      }
 
       <section class="article-content">
         <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
         <h1>${escapeHtml(page.title)}</h1>
         <p class="intro">${escapeHtml(page.intro || "")}</p>
-
         ${renderSections(page)}
-
         ${
           isHub
             ? ""
             : `
-        <p class="back-link">
-          <a href="/">← Back to hub</a>
-        </p>
-        `
+              <p class="back-link">
+                <a href="/">← Back to hub</a>
+              </p>
+            `
         }
       </section>
     </article>
 
+    ${renderMonetisationBlock(page)}
+    ${renderLinksBlock("Useful Internal Links", page.internalLinks || [], false)}
+    ${renderLinksBlock("Authoritative External Resources", page.externalLinks || [], true)}
     ${renderRelated(page)}
     ${renderFaqs(page)}
     ${renderCta(page.cta)}
   </main>
 
   <footer>
-    <div class="footer-links">
-      ${renderFooterLinks(site)}
-    </div>
+    <div class="footer-links">${renderFooterLinks(site)}</div>
     <p>© ${escapeHtml(site.name)}</p>
   </footer>
 </body>
@@ -427,10 +451,7 @@ function renderServicePage(page, site) {
     <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
       <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
     </a>
-
-    <nav>
-      ${renderNav(site)}
-    </nav>
+    <nav>${renderNav(site)}</nav>
   </header>
 
   <main>
@@ -451,22 +472,20 @@ function renderServicePage(page, site) {
 
     ${renderInfoGrid(page.whyChooseTitle, page.whyChooseItems)}
     ${renderInfoGrid(page.servicesTitle, page.services)}
-    ${renderCta(page.ctaPanel)}
     ${renderRelated(page)}
     ${renderFaqs(page)}
+    ${renderCta(page.ctaPanel)}
   </main>
 
   <footer>
-    <div class="footer-links">
-      ${renderFooterLinks(site)}
-    </div>
+    <div class="footer-links">${renderFooterLinks(site)}</div>
     <p>© ${escapeHtml(site.name)}</p>
   </footer>
 </body>
 </html>`;
 }
 
-function renderGenericToolPage(page, site) {
+function renderToolPage(page, site) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -481,10 +500,7 @@ function renderGenericToolPage(page, site) {
     <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
       <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
     </a>
-
-    <nav>
-      ${renderNav(site)}
-    </nav>
+    <nav>${renderNav(site)}</nav>
   </header>
 
   <main>
@@ -493,13 +509,6 @@ function renderGenericToolPage(page, site) {
         <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
         <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
         <p class="intro">${escapeHtml(page.heroText || "")}</p>
-        ${
-          page.heroButtonLabel && page.heroButtonUrl
-            ? `<p><a class="cta-button" href="${escapeHtml(
-                page.heroButtonUrl
-              )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
-            : ""
-        }
       </div>
     </section>
 
@@ -508,256 +517,25 @@ function renderGenericToolPage(page, site) {
         <h2>${escapeHtml(page.toolTitle || page.title)}</h2>
         <p>${escapeHtml(page.toolIntro || "")}</p>
       </div>
-
-      ${renderToolFields(page.toolFields)}
-
-      <div class="tool-output">
-        <h3>Generated output</h3>
-        <p>This area is reserved for the live AI-assisted output. Later, your Cloudflare Worker with AI binding can populate this section dynamically.</p>
-      </div>
     </section>
 
     ${renderInfoGrid(page.supportTitle, page.supportItems)}
-    ${renderCta(page.ctaPanel)}
     ${renderRelated(page)}
     ${renderFaqs(page)}
+    ${renderCta(page.ctaPanel)}
   </main>
 
   <footer>
-    <div class="footer-links">
-      ${renderFooterLinks(site)}
-    </div>
+    <div class="footer-links">${renderFooterLinks(site)}</div>
     <p>© ${escapeHtml(site.name)}</p>
   </footer>
 </body>
 </html>`;
-}
-
-function renderAiGeneratorToolPage(page, site) {
-  return `<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>${escapeHtml(page.title)}</title>
-  <meta name="description" content="${escapeHtml(page.metaDescription)}">
-  <link rel="stylesheet" href="/assets/styles/main.css">
-  ${renderSchemaScripts(page, site)}
-</head>
-<body>
-  <header>
-    <a class="site-logo" href="https://marketingspecialists.co.za/digital-marketing-agency-in-south-africa">
-      <img src="${escapeHtml(site.logoUrl)}" alt="${escapeHtml(site.name)}">
-    </a>
-
-    <nav>
-      ${renderNav(site)}
-    </nav>
-  </header>
-
-  <main>
-    <section class="tool-hero">
-      <div class="tool-hero-inner">
-        <p class="eyebrow">${escapeHtml(page.eyebrow || "")}</p>
-        <h1>${escapeHtml(page.heroTitle || page.title)}</h1>
-        <p class="intro">${escapeHtml(page.heroText || "")}</p>
-        ${
-          page.heroButtonLabel && page.heroButtonUrl
-            ? `<p><a class="cta-button" href="${escapeHtml(
-                page.heroButtonUrl
-              )}">${escapeHtml(page.heroButtonLabel)}</a></p>`
-            : ""
-        }
-      </div>
-    </section>
-
-    <section class="tool-shell ai-generator-shell">
-      <div class="tool-shell-header">
-        <h2>${escapeHtml(page.toolTitle || page.title)}</h2>
-        <p>${escapeHtml(page.toolIntro || "")}</p>
-      </div>
-
-      <form id="ai-page-generator-form" class="generator-form">
-        <div class="generator-grid">
-          <label class="generator-field">
-            <span>Page type</span>
-            <select name="pageType">
-              <option value="guide">Guide</option>
-              <option value="service">Service</option>
-              <option value="city">City</option>
-              <option value="industry">Industry</option>
-            </select>
-          </label>
-
-          <label class="generator-field">
-            <span>Topic</span>
-            <input type="text" name="topic" placeholder="Example: SEO for dentists in Cape Town" required>
-          </label>
-
-          <label class="generator-field">
-            <span>Primary keyword</span>
-            <input type="text" name="primaryKeyword" placeholder="Example: SEO for dentists Cape Town">
-          </label>
-
-          <label class="generator-field">
-            <span>Search intent</span>
-            <input type="text" name="searchIntent" placeholder="Example: Commercial investigation">
-          </label>
-
-          <label class="generator-field">
-            <span>Audience</span>
-            <input type="text" name="audience" placeholder="Example: Small business owners">
-          </label>
-
-          <label class="generator-field">
-            <span>City</span>
-            <input type="text" name="city" placeholder="Example: Johannesburg">
-          </label>
-
-          <label class="generator-field">
-            <span>Industry</span>
-            <input type="text" name="industry" placeholder="Example: Legal services">
-          </label>
-
-          <label class="generator-field">
-            <span>CTA label</span>
-            <input type="text" name="ctaLabel" placeholder="Example: Contact Us">
-          </label>
-
-          <label class="generator-field generator-field--full">
-            <span>Secondary keywords</span>
-            <textarea name="secondaryKeywords" rows="4" placeholder="Enter secondary keywords separated by commas or line breaks"></textarea>
-          </label>
-
-          <label class="generator-field generator-field--full">
-            <span>Extra instructions</span>
-            <textarea name="extraInstructions" rows="5" placeholder="Add any extra direction for tone, structure, angles, local context, conversion goals, or internal linking ideas"></textarea>
-          </label>
-
-          <label class="generator-field generator-field--full">
-            <span>CTA URL</span>
-            <input type="text" name="ctaUrl" placeholder="https://marketingspecialists.co.za/contact">
-          </label>
-        </div>
-
-        <div class="generator-actions">
-          <button type="submit" class="cta-button" id="ai-generator-submit">Generate JSON Draft</button>
-          <button type="button" class="secondary-button" id="ai-generator-copy">Copy Output</button>
-        </div>
-
-        <p class="generator-note">This creates structured draft data for your Cloudflare content system. It does not commit into Git automatically yet.</p>
-
-        <label class="generator-output-wrap">
-          <span>Generated JSON draft</span>
-          <textarea id="ai-generator-output" rows="22" placeholder="Your generated page data will appear here..."></textarea>
-        </label>
-      </form>
-    </section>
-
-    ${renderInfoGrid(page.supportTitle, page.supportItems)}
-    ${renderCta(page.ctaPanel)}
-    ${renderRelated(page)}
-    ${renderFaqs(page)}
-
-    <script>
-      (() => {
-        const form = document.getElementById("ai-page-generator-form");
-        const output = document.getElementById("ai-generator-output");
-        const submitButton = document.getElementById("ai-generator-submit");
-        const copyButton = document.getElementById("ai-generator-copy");
-
-        if (!form || !output || !submitButton || !copyButton) return;
-
-        form.addEventListener("submit", async (event) => {
-          event.preventDefault();
-
-          const formData = new FormData(form);
-          const payload = {
-            pageType: formData.get("pageType") || "guide",
-            topic: formData.get("topic") || "",
-            primaryKeyword: formData.get("primaryKeyword") || "",
-            secondaryKeywords: formData.get("secondaryKeywords") || "",
-            searchIntent: formData.get("searchIntent") || "",
-            audience: formData.get("audience") || "",
-            city: formData.get("city") || "",
-            industry: formData.get("industry") || "",
-            ctaLabel: formData.get("ctaLabel") || "",
-            ctaUrl: formData.get("ctaUrl") || "",
-            extraInstructions: formData.get("extraInstructions") || ""
-          };
-
-          output.value = "Generating draft...";
-          submitButton.disabled = true;
-          submitButton.textContent = "Generating...";
-
-          try {
-            const response = await fetch("/api/generate-page", {
-              method: "POST",
-              headers: {
-                "content-type": "application/json"
-              },
-              body: JSON.stringify(payload)
-            });
-
-            const result = await response.json();
-
-            if (!response.ok || !result.ok) {
-              throw new Error(result.error || "Generation failed.");
-            }
-
-            output.value = JSON.stringify(result.draft, null, 2);
-          } catch (error) {
-            output.value = "Error: " + (error.message || "Generation failed.");
-          } finally {
-            submitButton.disabled = false;
-            submitButton.textContent = "Generate JSON Draft";
-          }
-        });
-
-        copyButton.addEventListener("click", async () => {
-          try {
-            await navigator.clipboard.writeText(output.value || "");
-            copyButton.textContent = "Copied";
-            setTimeout(() => {
-              copyButton.textContent = "Copy Output";
-            }, 1200);
-          } catch {
-            copyButton.textContent = "Copy failed";
-            setTimeout(() => {
-              copyButton.textContent = "Copy Output";
-            }, 1200);
-          }
-        });
-      })();
-    </script>
-  </main>
-
-  <footer>
-    <div class="footer-links">
-      ${renderFooterLinks(site)}
-    </div>
-    <p>© ${escapeHtml(site.name)}</p>
-  </footer>
-</body>
-</html>`;
-}
-
-function renderToolPage(page, site) {
-  if (page.generatorMode === "seo-page-generator") {
-    return renderAiGeneratorToolPage(page, site);
-  }
-
-  return renderGenericToolPage(page, site);
 }
 
 function renderPage(page, site) {
-  if (page.type === "service") {
-    return renderServicePage(page, site);
-  }
-
-  if (page.type === "tool") {
-    return renderToolPage(page, site);
-  }
-
+  if (page.type === "service") return renderServicePage(page, site);
+  if (page.type === "tool") return renderToolPage(page, site);
   return renderGenericPage(page, site);
 }
 

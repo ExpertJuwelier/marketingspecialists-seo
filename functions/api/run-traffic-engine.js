@@ -350,7 +350,6 @@ Extra instructions: ${cleanString(input.extraInstructions)}
 
 Length guidance:
 - This page should become a serious long-form draft.
-- The final full article should feel substantial, not thin.
 - This outline should be built for depth, clarity, and commercial usefulness.
 `;
 }
@@ -455,13 +454,17 @@ async function createBatchFileInGitHub({
     .join("/");
 
   const url = `https://api.github.com/repos/${owner}/${repo}/contents/${encodedPath}`;
+  const userAgent = "marketingspecialists-traffic-engine";
+
+  const commonHeaders = {
+    Accept: "application/vnd.github+json",
+    Authorization: `Bearer ${token}`,
+    "X-GitHub-Api-Version": "2022-11-28",
+    "User-Agent": userAgent
+  };
 
   const getRes = await fetch(`${url}?ref=${encodeURIComponent(branch)}`, {
-    headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
-      "X-GitHub-Api-Version": "2022-11-28"
-    }
+    headers: commonHeaders
   });
 
   let sha = null;
@@ -473,9 +476,7 @@ async function createBatchFileInGitHub({
   const putRes = await fetch(url, {
     method: "PUT",
     headers: {
-      Accept: "application/vnd.github+json",
-      Authorization: `Bearer ${token}`,
-      "X-GitHub-Api-Version": "2022-11-28",
+      ...commonHeaders,
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
@@ -518,7 +519,10 @@ export async function onRequestPost(context) {
     const requestKey = cleanString(body.engineKey);
     const engineKey = headerKey || requestKey;
 
-    if (cleanString(context.env.TRAFFIC_ENGINE_KEY) && engineKey !== cleanString(context.env.TRAFFIC_ENGINE_KEY)) {
+    if (
+      cleanString(context.env.TRAFFIC_ENGINE_KEY) &&
+      engineKey !== cleanString(context.env.TRAFFIC_ENGINE_KEY)
+    ) {
       return new Response(
         JSON.stringify({
           ok: false,

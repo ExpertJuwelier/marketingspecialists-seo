@@ -1,5 +1,8 @@
 const JSON_HEADERS = {
-  "content-type": "application/json; charset=UTF-8"
+  "content-type": "application/json; charset=UTF-8",
+  "access-control-allow-origin": "*",
+  "access-control-allow-methods": "POST, OPTIONS",
+  "access-control-allow-headers": "content-type"
 };
 
 function slugify(value = "") {
@@ -45,10 +48,10 @@ function defaultHeroImage(pageType) {
 }
 
 function defaultHeroAlt(pageType, topic) {
-  if (pageType === "service") return `${topic} dashboard and digital marketing performance`;
-  if (pageType === "city") return `${topic} local business growth and SEO visibility`;
-  if (pageType === "industry") return `${topic} industry marketing strategy and business planning`;
-  return `${topic} SEO strategy and business planning`;
+  if (pageType === "service") return `${topic} digital marketing and business growth`;
+  if (pageType === "city") return `${topic} local SEO and business growth`;
+  if (pageType === "industry") return `${topic} industry marketing strategy`;
+  return `${topic} SEO strategy and planning`;
 }
 
 function defaultRelated(pageType) {
@@ -80,6 +83,40 @@ function ensureArray(value, fallback = []) {
   return Array.isArray(value) ? value : fallback;
 }
 
+function cleanString(value = "") {
+  return String(value).trim();
+}
+
+function coerceFaqs(value, count = 4) {
+  return ensureArray(value, [])
+    .map((item) => ({
+      question: cleanString(item?.question || ""),
+      answer: cleanString(item?.answer || "")
+    }))
+    .filter((item) => item.question && item.answer)
+    .slice(0, count);
+}
+
+function coerceSections(value, count = 6) {
+  return ensureArray(value, [])
+    .map((item) => ({
+      heading: cleanString(item?.heading || ""),
+      body: cleanString(item?.body || "")
+    }))
+    .filter((item) => item.heading && item.body)
+    .slice(0, count);
+}
+
+function coerceInfoItems(value, count = 4) {
+  return ensureArray(value, [])
+    .map((item) => ({
+      title: cleanString(item?.title || ""),
+      text: cleanString(item?.text || "")
+    }))
+    .filter((item) => item.title && item.text)
+    .slice(0, count);
+}
+
 function coerceDraft(draft, input) {
   const pageType = normaliseType(input.pageType);
   const topic = input.topic || input.primaryKeyword || "Untitled page";
@@ -93,90 +130,153 @@ function coerceDraft(draft, input) {
     return {
       type: "service",
       path: pagePath,
-      title: draft.title || topic,
-      metaDescription: draft.metaDescription || `Explore ${topic} and how it can support visibility, enquiries, and long-term business growth.`,
-      eyebrow: draft.eyebrow || defaultEyebrow(pageType),
-      heroTitle: draft.heroTitle || draft.title || topic,
-      heroText:
+      title: cleanString(draft.title || topic),
+      metaDescription: cleanString(
+        draft.metaDescription ||
+          `Explore ${topic} and how it can support visibility, enquiries, and business growth.`
+      ),
+      eyebrow: cleanString(draft.eyebrow || defaultEyebrow(pageType)),
+      heroTitle: cleanString(draft.heroTitle || draft.title || topic),
+      heroText: cleanString(
         draft.heroText ||
-        `Learn how ${topic} can improve visibility, strengthen trust, and support lead generation.`,
-      heroButtonLabel: input.ctaLabel || "Contact Us",
-      heroButtonUrl: input.ctaUrl || "https://marketingspecialists.co.za/contact",
+          `Learn how ${topic} can improve visibility, strengthen trust, and support lead generation.`
+      ),
+      heroButtonLabel: cleanString(input.ctaLabel || "Contact Us"),
+      heroButtonUrl: cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact"),
       heroImage,
       heroAlt,
-      whyChooseTitle: draft.whyChooseTitle || "Why this page matters",
-      whyChooseItems: ensureArray(draft.whyChooseItems, []).slice(0, 4),
-      servicesTitle: draft.servicesTitle || "What this page should highlight",
-      services: ensureArray(draft.services, []).slice(0, 4),
+      whyChooseTitle: cleanString(draft.whyChooseTitle || "Why this page matters"),
+      whyChooseItems: coerceInfoItems(draft.whyChooseItems, 4),
+      servicesTitle: cleanString(draft.servicesTitle || "What this page should highlight"),
+      services: coerceInfoItems(draft.services, 4),
       ctaPanel: {
-        headline: draft.ctaPanel?.headline || `Need help with ${topic}?`,
-        text:
+        headline: cleanString(
+          draft.ctaPanel?.headline || `Need help with ${topic}?`
+        ),
+        text: cleanString(
           draft.ctaPanel?.text ||
-          `Turn stronger visibility and clearer positioning into better-quality enquiries.`,
-        buttonLabel: input.ctaLabel || draft.ctaPanel?.buttonLabel || "Contact Us",
-        buttonUrl: input.ctaUrl || draft.ctaPanel?.buttonUrl || "https://marketingspecialists.co.za/contact"
+            `Turn stronger visibility and clearer positioning into better-quality enquiries.`
+        ),
+        buttonLabel: cleanString(
+          input.ctaLabel || draft.ctaPanel?.buttonLabel || "Contact Us"
+        ),
+        buttonUrl: cleanString(
+          input.ctaUrl || draft.ctaPanel?.buttonUrl || "https://marketingspecialists.co.za/contact"
+        )
       },
-      insightsTitle: draft.insightsTitle || "Related Insights",
+      insightsTitle: cleanString(draft.insightsTitle || "Related Insights"),
       related,
-      faqTitle: draft.faqTitle || `${topic} FAQs`,
-      faqs: ensureArray(draft.faqs, []).slice(0, 4)
+      faqTitle: cleanString(draft.faqTitle || `${topic} FAQs`),
+      faqs: coerceFaqs(draft.faqs, 4)
     };
   }
 
   return {
     type: pageType,
     path: pagePath,
-    title: draft.title || topic,
-    metaDescription: draft.metaDescription || `Learn about ${topic} and how it supports visibility, search intent, and business growth.`,
-    eyebrow: draft.eyebrow || defaultEyebrow(pageType),
+    title: cleanString(draft.title || topic),
+    metaDescription: cleanString(
+      draft.metaDescription ||
+        `Learn about ${topic} and how it supports visibility, search intent, and business growth.`
+    ),
+    eyebrow: cleanString(draft.eyebrow || defaultEyebrow(pageType)),
     heroImage,
     heroAlt,
-    intro:
+    intro: cleanString(
       draft.intro ||
-      `Learn about ${topic}, why it matters, and how a stronger page structure can support visibility and enquiries.`,
-    sections: ensureArray(draft.sections, []).slice(0, 6),
-    faqTitle: draft.faqTitle || `${topic} FAQs`,
-    faqs: ensureArray(draft.faqs, []).slice(0, 4),
+        `Learn about ${topic}, why it matters, and how a stronger page structure can support visibility and enquiries.`
+    ),
+    sections: coerceSections(draft.sections, 6),
+    faqTitle: cleanString(draft.faqTitle || `${topic} FAQs`),
+    faqs: coerceFaqs(draft.faqs, 4),
     cta: {
-      headline: draft.cta?.headline || `Need help with ${topic}?`,
-      text:
+      headline: cleanString(
+        draft.cta?.headline || `Need help with ${topic}?`
+      ),
+      text: cleanString(
         draft.cta?.text ||
-        `Build a smarter page strategy that supports visibility, trust, and stronger enquiries.`,
-      buttonLabel: input.ctaLabel || draft.cta?.buttonLabel || "Contact Us",
-      buttonUrl: input.ctaUrl || draft.cta?.buttonUrl || "https://marketingspecialists.co.za/contact"
+          `Build a smarter page strategy that supports visibility, trust, and stronger enquiries.`
+      ),
+      buttonLabel: cleanString(
+        input.ctaLabel || draft.cta?.buttonLabel || "Contact Us"
+      ),
+      buttonUrl: cleanString(
+        input.ctaUrl || draft.cta?.buttonUrl || "https://marketingspecialists.co.za/contact"
+      )
     },
     related
   };
 }
 
-function buildPrompt(input) {
+function buildMasterPrompt(input) {
   const pageType = normaliseType(input.pageType);
-  const topic = input.topic || "";
-  const primaryKeyword = input.primaryKeyword || "";
-  const secondaryKeywords = input.secondaryKeywords || "";
-  const searchIntent = input.searchIntent || "";
-  const audience = input.audience || "";
-  const city = input.city || "";
-  const industry = input.industry || "";
-  const extraInstructions = input.extraInstructions || "";
+  const topic = cleanString(input.topic || "");
+  const primaryKeyword = cleanString(input.primaryKeyword || "");
+  const secondaryKeywords = cleanString(input.secondaryKeywords || "");
+  const searchIntent = cleanString(input.searchIntent || "");
+  const audience = cleanString(input.audience || "");
+  const city = cleanString(input.city || "");
+  const industry = cleanString(input.industry || "");
+  const extraInstructions = cleanString(input.extraInstructions || "");
+  const ctaLabel = cleanString(input.ctaLabel || "Contact Us");
+  const ctaUrl = cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact");
 
-  const baseRules = `
-You are creating page data for The Marketing Specialists.
+  const universalRules = `
+You are creating structured SEO page drafts for The Marketing Specialists.
 
-Follow these rules strictly:
-- Use UK English.
+Non-negotiable writing rules:
+- Use UK English only.
 - No emojis.
 - No markdown.
-- No filler.
-- No hype promises like "guaranteed #1 rankings".
-- Make the content sound human, commercially aware, and useful.
-- Write content that is rich enough to become a serious first draft, not thin placeholder copy.
-- Match search intent properly.
-- Use the primary keyword naturally, not awkwardly.
-- Make section headings specific and useful.
-- Meta descriptions should be concise and click-worthy.
-- FAQs should reflect genuine search behaviour.
-- Return valid JSON only.
+- No placeholders.
+- No filler phrases.
+- No generic SEO clichés.
+- No exaggerated claims.
+- Do not write like a chatbot.
+- Do not produce thin copy.
+- Make the content commercially intelligent and useful.
+- Make it clear, human, and conversion-aware.
+- Keep the primary keyword natural.
+- Match the stated search intent properly.
+- Write for real users first, but keep the content search-aware.
+- FAQs must reflect plausible search behaviour.
+- Titles must sound publishable.
+- Meta descriptions must be concise and compelling.
+- Section headings must be specific and meaningful.
+- Output valid JSON only.
+`;
+
+  const commercialLogic = `
+Commercial logic:
+- A guide page should educate while quietly supporting commercial intent.
+- A service page should convert while still being useful and credible.
+- A city page should feel location-aware, relevant, and not stuffed.
+- An industry page should feel sector-aware, specific, and grounded in how buyers think.
+- Avoid empty buzzwords.
+- Prefer specificity over vagueness.
+- Make the CTA text sound relevant to the page.
+`;
+
+  const authorityLogic = `
+Authority logic:
+- Where appropriate, imply that the content should support trust, credibility, and informed decision-making.
+- Do not fabricate statistics, awards, or achievements.
+- Do not mention external sources unless truly necessary to the meaning of the draft.
+- Do not include citations in the JSON.
+`;
+
+  const inputBlock = `
+Page type: ${pageType}
+Topic: ${topic}
+Primary keyword: ${primaryKeyword}
+Secondary keywords: ${secondaryKeywords}
+Search intent: ${searchIntent}
+Audience: ${audience}
+City: ${city}
+Industry: ${industry}
+CTA label: ${ctaLabel}
+CTA URL: ${ctaUrl}
+Extra instructions: ${extraInstructions}
 `;
 
   const guideShape = `
@@ -184,7 +284,7 @@ Return exactly this JSON shape:
 {
   "title": "string",
   "metaDescription": "string",
-  "eyebrow": "SEO Guide",
+  "eyebrow": "string",
   "heroImage": "string",
   "heroAlt": "string",
   "intro": "string",
@@ -218,7 +318,7 @@ Return exactly this JSON shape:
 {
   "title": "string",
   "metaDescription": "string",
-  "eyebrow": "Digital Marketing Services",
+  "eyebrow": "string",
   "heroTitle": "string",
   "heroText": "string",
   "heroImage": "string",
@@ -255,42 +355,46 @@ Return exactly this JSON shape:
 }
 `;
 
-  const shape = pageType === "service" ? serviceShape : guideShape;
+  const typeInstructions =
+    pageType === "service"
+      ? `
+Service-page specific instructions:
+- Make the page feel like a serious landing page, not a blog post.
+- The title should sound commercially relevant and publishable.
+- The hero text should be concise but persuasive.
+- "whyChooseItems" should sound like meaningful buying reasons, not empty selling points.
+- "services" should describe what is actually being delivered or supported.
+- The CTA should feel contextually relevant.
+- Avoid sounding overblown or aggressive.
+`
+      : `
+Guide-page specific instructions:
+- Make the page educational, useful, and strategically commercial.
+- The intro should feel relevant to the topic and search intent.
+- The sections should move logically.
+- Do not repeat the same point in different words.
+- The CTA should connect naturally to the topic.
+`;
 
   return `
-${baseRules}
+${universalRules}
 
-Page type: ${pageType}
-Topic: ${topic}
-Primary keyword: ${primaryKeyword}
-Secondary keywords: ${secondaryKeywords}
-Search intent: ${searchIntent}
-Audience: ${audience}
-City: ${city}
-Industry: ${industry}
-CTA label: ${input.ctaLabel || "Contact Us"}
-CTA URL: ${input.ctaUrl || "https://marketingspecialists.co.za/contact"}
-Extra instructions: ${extraInstructions}
+${commercialLogic}
 
-Use the user's page context to create a high-quality structured draft.
-If the page type is city, make the content location-aware.
-If the page type is industry, make the content sector-aware.
-If the page type is service, make the content conversion-aware.
-If the page type is guide, make the content educational but still commercially useful.
+${authorityLogic}
 
-${shape}
+${inputBlock}
+
+${typeInstructions}
+
+${pageType === "service" ? serviceShape : guideShape}
 `;
 }
 
 export async function onRequestOptions() {
   return new Response(null, {
     status: 204,
-    headers: {
-      ...JSON_HEADERS,
-      "access-control-allow-origin": "*",
-      "access-control-allow-methods": "POST, OPTIONS",
-      "access-control-allow-headers": "content-type"
-    }
+    headers: JSON_HEADERS
   });
 }
 
@@ -308,7 +412,7 @@ export async function onRequestPost(context) {
 
     const input = await context.request.json();
     const pageType = normaliseType(input.pageType);
-    const topic = (input.topic || "").trim();
+    const topic = cleanString(input.topic || "");
 
     if (!topic) {
       return new Response(
@@ -320,7 +424,7 @@ export async function onRequestPost(context) {
       );
     }
 
-    const prompt = buildPrompt({
+    const prompt = buildMasterPrompt({
       ...input,
       pageType
     });
@@ -330,7 +434,7 @@ export async function onRequestPost(context) {
         {
           role: "system",
           content:
-            "You are an elite SEO content strategist for The Marketing Specialists. Return JSON only."
+            "You are an elite SEO strategist and conversion-focused content architect for The Marketing Specialists. Return valid JSON only. Do not include markdown, notes, or commentary."
         },
         {
           role: "user",
@@ -338,7 +442,7 @@ export async function onRequestPost(context) {
         }
       ],
       max_tokens: 3500,
-      temperature: 0.35
+      temperature: 0.2
     });
 
     const rawText = result?.response || "";

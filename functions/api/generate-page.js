@@ -15,6 +15,18 @@ function slugify(value = "") {
     .replace(/-{2,}/g, "-");
 }
 
+function cleanString(value = "") {
+  return String(value || "").trim();
+}
+
+function ensureArray(value, fallback = []) {
+  return Array.isArray(value) ? value : fallback;
+}
+
+function isLikelyUrl(value = "") {
+  return /^https?:\/\//i.test(cleanString(value));
+}
+
 function normaliseType(value = "") {
   const allowed = new Set(["guide", "service", "city", "industry"]);
   return allowed.has(value) ? value : "guide";
@@ -47,10 +59,16 @@ function defaultHeroImage(pageType) {
   return "https://images.unsplash.com/photo-1554224155-6726b3ff858f?auto=format&fit=crop&w=1400&q=80";
 }
 
-function defaultHeroAlt(pageType, topic) {
-  if (pageType === "service") return `${topic} digital marketing and business growth`;
-  if (pageType === "city") return `${topic} local SEO and business growth`;
-  if (pageType === "industry") return `${topic} industry marketing strategy`;
+function defaultHeroAlt(pageType, topic, city, industry) {
+  if (pageType === "service") {
+    return `${topic} digital marketing and business growth`;
+  }
+  if (pageType === "city") {
+    return `${topic} in ${city || "this city"} and local business growth`;
+  }
+  if (pageType === "industry") {
+    return `${topic} for ${industry || "this industry"} and marketing strategy`;
+  }
   return `${topic} SEO strategy and planning`;
 }
 
@@ -63,10 +81,26 @@ function defaultRelated(pageType) {
     ];
   }
 
+  if (pageType === "city") {
+    return [
+      "/guides/google-ads-vs-seo-for-small-business.html",
+      "/guides/how-much-does-seo-cost-south-africa.html",
+      "/services/digital-marketing-services.html"
+    ];
+  }
+
+  if (pageType === "industry") {
+    return [
+      "/guides/how-seo-pages-bring-leads.html",
+      "/guides/google-ads-vs-seo-for-small-business.html",
+      "/services/digital-marketing-services.html"
+    ];
+  }
+
   return [
-    "/guides/google-ads-vs-seo-for-small-business.html",
     "/guides/how-much-does-seo-cost-south-africa.html",
-    "/cities/seo-services-johannesburg.html"
+    "/guides/how-seo-pages-bring-leads.html",
+    "/services/digital-marketing-services.html"
   ];
 }
 
@@ -80,18 +114,193 @@ function defaultInternalLinks(pageType) {
       {
         anchor: "how much SEO costs in South Africa",
         path: "/guides/how-much-does-seo-cost-south-africa.html"
+      },
+      {
+        anchor: "Google Ads vs SEO for small business",
+        path: "/guides/google-ads-vs-seo-for-small-business.html"
+      }
+    ];
+  }
+
+  if (pageType === "city") {
+    return [
+      {
+        anchor: "digital marketing services",
+        path: "/services/digital-marketing-services.html"
+      },
+      {
+        anchor: "SEO services Johannesburg",
+        path: "/cities/seo-services-johannesburg.html"
+      },
+      {
+        anchor: "how SEO pages bring leads",
+        path: "/guides/how-seo-pages-bring-leads.html"
+      }
+    ];
+  }
+
+  if (pageType === "industry") {
+    return [
+      {
+        anchor: "digital marketing services",
+        path: "/services/digital-marketing-services.html"
+      },
+      {
+        anchor: "how SEO pages bring leads",
+        path: "/guides/how-seo-pages-bring-leads.html"
+      },
+      {
+        anchor: "Google Ads vs SEO for small business",
+        path: "/guides/google-ads-vs-seo-for-small-business.html"
       }
     ];
   }
 
   return [
     {
-      anchor: "Google Ads vs SEO for small business",
-      path: "/guides/google-ads-vs-seo-for-small-business.html"
+      anchor: "digital marketing services",
+      path: "/services/digital-marketing-services.html"
     },
     {
-      anchor: "SEO services Johannesburg",
-      path: "/cities/seo-services-johannesburg.html"
+      anchor: "how much SEO costs in South Africa",
+      path: "/guides/how-much-does-seo-cost-south-africa.html"
+    },
+    {
+      anchor: "Google Ads vs SEO for small business",
+      path: "/guides/google-ads-vs-seo-for-small-business.html"
+    }
+  ];
+}
+
+function sanitiseExternalLinks(value) {
+  return ensureArray(value, [])
+    .map((item) => ({
+      anchor: cleanString(item?.anchor || ""),
+      url: cleanString(item?.url || "")
+    }))
+    .filter((item) => item.anchor && isLikelyUrl(item.url))
+    .slice(0, 6);
+}
+
+function coerceSections(value, minCount = 6, maxCount = 8) {
+  const sections = ensureArray(value, [])
+    .map((item) => ({
+      heading: cleanString(item?.heading || ""),
+      body: cleanString(item?.body || "")
+    }))
+    .filter((item) => item.heading && item.body);
+
+  return sections.slice(0, maxCount);
+}
+
+function coerceFaqs(value, minCount = 4, maxCount = 5) {
+  const faqs = ensureArray(value, [])
+    .map((item) => ({
+      question: cleanString(item?.question || ""),
+      answer: cleanString(item?.answer || "")
+    }))
+    .filter((item) => item.question && item.answer);
+
+  return faqs.slice(0, maxCount);
+}
+
+function coerceInfoItems(value, maxCount = 4) {
+  return ensureArray(value, [])
+    .map((item) => ({
+      title: cleanString(item?.title || ""),
+      text: cleanString(item?.text || "")
+    }))
+    .filter((item) => item.title && item.text)
+    .slice(0, maxCount);
+}
+
+function fallbackGuideSections(input) {
+  const topic = cleanString(input.topic || input.primaryKeyword || "this topic");
+  const pageType = normaliseType(input.pageType);
+  const city = cleanString(input.city || "");
+  const industry = cleanString(input.industry || "");
+  const intent = cleanString(input.searchIntent || "informational or commercial");
+  const locationLine = pageType === "city" && city ? ` in ${city}` : "";
+  const industryLine = pageType === "industry" && industry ? ` for ${industry}` : "";
+
+  return [
+    {
+      heading: `Why ${topic} matters${locationLine}${industryLine}`,
+      body: `${topic} matters because search visibility is rarely about getting any traffic at all. It is about attracting the right visitors, answering the right question, and giving readers a reason to keep moving through the buying journey. When a page matches intent properly, it becomes more useful, more credible, and more commercially valuable than pages that only repeat keywords.`
+    },
+    {
+      heading: `What searchers usually want when they look for ${topic}`,
+      body: `Most searchers looking for ${topic} want clarity more than hype. They are usually trying to compare options, understand what affects results, avoid bad decisions, or figure out which next step makes the most sense. That means a stronger page needs to do more than define the term. It needs to reduce confusion and make the topic easier to act on.`
+    },
+    {
+      heading: `What often weakens pages targeting ${topic}`,
+      body: `Pages about ${topic} often underperform because they stay generic. They mention the keyword, but they do not really satisfy the intent behind the search. Weak pages tend to rely on vague headings, repetitive advice, and thin copy that could apply to almost any subject. Stronger pages feel specific, deliberate, and grounded in how real readers think.`
+    },
+    {
+      heading: `How to make the page more useful`,
+      body: `A more useful page explains what matters, what should be compared, what mistakes to avoid, and what a good outcome actually looks like. It should help readers move from curiosity to clarity. For ${topic}, that means structuring the page in a way that feels practical, readable, and aligned with ${intent} intent rather than sounding like a generic SEO template.`
+    },
+    {
+      heading: `Where commercial value fits in`,
+      body: `Useful content can still support commercial goals without becoming aggressive. In fact, the strongest commercial pages are often the ones that help readers understand the subject more clearly. When a page genuinely improves understanding, it builds trust. That trust makes the eventual CTA more natural because the reader feels guided rather than pushed.`
+    },
+    {
+      heading: `Why structure and internal linking matter`,
+      body: `A page about ${topic} should not exist in isolation. It should support service pages, city pages, tools, and other guides through sensible internal linking. That helps search engines understand the site structure and helps readers discover the next relevant page. In practice, better internal linking often improves both usability and strategic relevance.`
+    },
+    {
+      heading: `What makes a page about ${topic} more competitive`,
+      body: `Competitive pages tend to do several things well at once. They match the keyword naturally, answer the search properly, organise the information clearly, and avoid thin repetition. They also feel like they were written by someone who understands what readers actually need. That level of relevance is often what separates a page that ranks from one that stays invisible.`
+    },
+    {
+      heading: `What a strong next step looks like`,
+      body: `A strong next step should feel like a logical continuation of the page, not an interruption. Once the reader understands ${topic}, the page should direct them toward a relevant service, supporting guide, local page, or conversion step. That is how content starts functioning as part of a real lead-generation system rather than sitting on the site as passive copy.`
+    }
+  ];
+}
+
+function fallbackServiceWhyChoose(input) {
+  const topic = cleanString(input.topic || input.primaryKeyword || "this service");
+
+  return [
+    {
+      title: "Commercially aligned positioning",
+      text: `A strong ${topic} page should help the right buyer understand not only what the service is, but why it matters commercially. That means clearer positioning, more relevant messaging, and less generic noise.`
+    },
+    {
+      title: "Better intent matching",
+      text: `Service pages perform better when they speak directly to commercial search intent. The page should feel built for decision-stage readers rather than sounding like a broad educational article that never reaches a point.`
+    },
+    {
+      title: "Stronger trust signals",
+      text: `Buyers are more likely to enquire when the page feels clear, credible, and useful. A stronger service page reduces confusion, answers practical questions, and makes the offer easier to understand.`
+    },
+    {
+      title: "Clearer conversion path",
+      text: `A service page should not rely on design alone to convert. The copy itself needs to build confidence, show relevance, and create a sensible next step that matches the reader’s level of readiness.`
+    }
+  ];
+}
+
+function fallbackServiceItems(input) {
+  const topic = cleanString(input.topic || input.primaryKeyword || "this service");
+
+  return [
+    {
+      title: "Strategy and page planning",
+      text: `The page should explain how ${topic} supports visibility, positioning, and business growth in a way that feels relevant to buyers who are comparing options seriously.`
+    },
+    {
+      title: "Clearer buyer communication",
+      text: "Strong service pages help buyers understand what is being offered, why it matters, and what a better outcome could look like without drowning them in generic marketing language."
+    },
+    {
+      title: "Search and conversion alignment",
+      text: "The strongest service pages balance search relevance with commercial intent, so they can support both visibility and enquiry quality rather than focusing on one at the expense of the other."
+    },
+    {
+      title: "Longer-term growth value",
+      text: "A better service page should not only help drive short-term interest. It should also become a stronger long-term asset that supports trust, internal linking, and broader digital performance."
     }
   ];
 }
@@ -105,335 +314,7 @@ function extractJson(text = "") {
   return text.slice(first, last + 1);
 }
 
-function ensureArray(value, fallback = []) {
-  return Array.isArray(value) ? value : fallback;
-}
-
-function cleanString(value = "") {
-  return String(value).trim();
-}
-
-function isLikelyUrl(value = "") {
-  return /^https?:\/\//i.test(String(value).trim());
-}
-
-function isInternalHtmlPath(value = "") {
-  return /^\/[a-z0-9\-\/]+\.html$/i.test(String(value).trim());
-}
-
-function sanitiseHeroImage(value, pageType) {
-  const cleaned = cleanString(value);
-  return isLikelyUrl(cleaned) ? cleaned : defaultHeroImage(pageType);
-}
-
-function sanitiseRelated(value, pageType) {
-  const cleaned = ensureArray(value, [])
-    .map((item) => cleanString(item))
-    .filter((item) => isInternalHtmlPath(item));
-
-  return cleaned.length ? cleaned.slice(0, 3) : defaultRelated(pageType);
-}
-
-function sanitiseInternalLinks(value, pageType) {
-  const cleaned = ensureArray(value, [])
-    .map((item) => ({
-      anchor: cleanString(item?.anchor || ""),
-      path: cleanString(item?.path || "")
-    }))
-    .filter((item) => item.anchor && isInternalHtmlPath(item.path));
-
-  return cleaned.length ? cleaned.slice(0, 6) : defaultInternalLinks(pageType);
-}
-
-function sanitiseExternalLinks(value) {
-  return ensureArray(value, [])
-    .map((item) => ({
-      anchor: cleanString(item?.anchor || ""),
-      url: cleanString(item?.url || "")
-    }))
-    .filter((item) => item.anchor && isLikelyUrl(item.url))
-    .slice(0, 6);
-}
-
-function coerceFaqs(value, count = 4) {
-  return ensureArray(value, [])
-    .map((item) => ({
-      question: cleanString(item?.question || ""),
-      answer: cleanString(item?.answer || "")
-    }))
-    .filter((item) => item.question && item.answer)
-    .slice(0, count);
-}
-
-function coerceSections(value, count = 8) {
-  return ensureArray(value, [])
-    .map((item) => ({
-      heading: cleanString(item?.heading || ""),
-      body: cleanString(item?.body || "")
-    }))
-    .filter((item) => item.heading && item.body)
-    .slice(0, count);
-}
-
-function coerceInfoItems(value, count = 4) {
-  return ensureArray(value, [])
-    .map((item) => ({
-      title: cleanString(item?.title || ""),
-      text: cleanString(item?.text || "")
-    }))
-    .filter((item) => item.title && item.text)
-    .slice(0, count);
-}
-
-function fallbackGuideSections(input, pageType) {
-  const topic = cleanString(input.topic || input.primaryKeyword || "this topic");
-  const geo = cleanString(input.city || "");
-  const sector = cleanString(input.industry || "");
-  const pageAngle =
-    pageType === "city"
-      ? `for businesses in ${geo || "this city"}`
-      : pageType === "industry"
-      ? `for ${sector || "this sector"}`
-      : "for businesses that want stronger search visibility";
-
-  return [
-    {
-      heading: `Why ${topic} matters`,
-      body: `${topic} matters because search visibility is rarely just about showing up. It is about showing up for the right search at the right stage of decision-making. A stronger page strategy helps businesses reach better-aligned visitors, reduce wasted traffic, and create a clearer path from search to enquiry. That is especially important ${pageAngle}, where broad pages often fail to answer specific questions properly.`
-    },
-    {
-      heading: `What searchers usually want to know about ${topic}`,
-      body: `Most people searching around ${topic} are not looking for vague theory. They want clarity, options, and confidence. They are usually trying to compare solutions, understand what affects results, avoid bad decisions, or find a provider that seems credible. A strong page draft should therefore answer real concerns instead of repeating generic SEO advice.`
-    },
-    {
-      heading: `What often goes wrong`,
-      body: `A common mistake is creating pages that mention the keyword but do not genuinely satisfy the search intent behind it. That leads to thin copy, weak engagement, and poor commercial performance. Another problem is overusing generic headings that could apply to almost any topic. A high-quality page should feel tailored, relevant, and informed by how actual buyers think.`
-    },
-    {
-      heading: `How to make the page more useful`,
-      body: `The strongest pages give readers a clear framework. They explain what influences outcomes, what trade-offs matter, what buyers should compare, and what next step makes sense. They also avoid bloated intros and get to the point quickly. For ${topic}, that means using plain language, helpful structure, and content that can be understood without specialist knowledge.`
-    },
-    {
-      heading: `Where commercial value comes in`,
-      body: `Useful pages do not need to sound overly salesy to support commercial value. They simply need to reduce confusion and move readers closer to action. If the page helps someone understand the problem better, compare options more intelligently, or recognise what quality looks like, it naturally becomes more valuable. That is the bridge between search intent and lead generation.`
-    },
-    {
-      heading: `How internal links should support the page`,
-      body: `Internal links matter because they connect informational content with higher-intent pages. A guide like this should point readers toward relevant service pages, supporting guides, local pages, or tools that continue the journey. That not only helps users navigate the site more easily, but also strengthens topical relationships across the content system.`
-    },
-    {
-      heading: `What makes this topic competitive`,
-      body: `When a keyword is competitive, the difference is rarely keyword usage alone. It is usually depth, structure, relevance, and clarity. Pages that rank well tend to feel complete. They answer the search properly, stay focused, and give people a reason to continue reading. A competitive page therefore needs more than optimisation. It needs better judgment.`
-    },
-    {
-      heading: `What a strong next step looks like`,
-      body: `A strong next step should feel logical, not forced. Once readers understand ${topic}, the page should point them toward an action that matches their stage of awareness. That could be contacting a specialist, comparing services, exploring local options, or reading another strategic guide. The point is to create momentum, not pressure.`
-    }
-  ];
-}
-
-function fallbackServiceWhyChoose(input) {
-  const topic = cleanString(input.topic || input.primaryKeyword || "this service");
-  return [
-    {
-      title: "Commercially focused planning",
-      text: `A strong ${topic} page should not just describe a service. It should help qualified prospects understand why the service matters, what affects performance, and what outcome they should realistically expect.`
-    },
-    {
-      title: "Clearer buyer guidance",
-      text: "Good service pages reduce uncertainty. They explain what should be compared, where common mistakes happen, and how a stronger strategy leads to better-quality enquiries rather than more noise."
-    },
-    {
-      title: "Better search alignment",
-      text: "Service pages perform better when they are built around real buyer intent. That means speaking to the search itself instead of forcing blog-style information into a decision-stage page."
-    },
-    {
-      title: "Stronger conversion support",
-      text: "A useful service page helps build trust before the reader ever gets in touch. It should feel informative, credible, and commercially aware from the first section to the final CTA."
-    }
-  ];
-}
-
-function fallbackServiceItems(input) {
-  const topic = cleanString(input.topic || input.primaryKeyword || "this service");
-  return [
-    {
-      title: "Strategic page positioning",
-      text: `The page should explain where ${topic} fits into a wider growth strategy and why that matters for businesses looking for more than surface-level visibility.`
-    },
-    {
-      title: "Intent-driven messaging",
-      text: "Service content should match decision-stage searches properly, using language that helps buyers compare options and understand value."
-    },
-    {
-      title: "Trust-building content structure",
-      text: "The strongest service pages reduce confusion, answer practical questions, and make the next step feel easier rather than more uncertain."
-    },
-    {
-      title: "Conversion-aware calls to action",
-      text: "CTAs should feel relevant to the page, the topic, and the reader’s stage of readiness instead of sounding generic or disconnected."
-    }
-  ];
-}
-
-function coerceDraft(draft, input) {
-  const pageType = normaliseType(input.pageType);
-  const topic = cleanString(input.topic || input.primaryKeyword || "Untitled page");
-  const slugBase = slugify(input.slug || input.primaryKeyword || input.topic || "new-page");
-  const pagePath = defaultPathForType(pageType, slugBase);
-  const heroImage = sanitiseHeroImage(draft.heroImage, pageType);
-  const heroAlt = cleanString(draft.heroAlt || defaultHeroAlt(pageType, topic));
-  const related = sanitiseRelated(draft.related, pageType);
-  const internalLinks = sanitiseInternalLinks(draft.internalLinks, pageType);
-  const externalLinks = sanitiseExternalLinks(draft.externalLinks);
-
-  if (pageType === "service") {
-    const whyChooseItems = coerceInfoItems(draft.whyChooseItems, 4);
-    const services = coerceInfoItems(draft.services, 4);
-    const faqs = coerceFaqs(draft.faqs, 4);
-
-    return {
-      type: "service",
-      path: pagePath,
-      title: cleanString(draft.title || topic),
-      metaDescription: cleanString(
-        draft.metaDescription ||
-          `Explore ${topic} and how it can support visibility, enquiries, and business growth.`
-      ),
-      eyebrow: cleanString(draft.eyebrow || defaultEyebrow(pageType)),
-      heroTitle: cleanString(draft.heroTitle || draft.title || topic),
-      heroText: cleanString(
-        draft.heroText ||
-          `Learn how ${topic} can improve visibility, strengthen trust, and support lead generation.`
-      ),
-      heroButtonLabel: cleanString(input.ctaLabel || "Contact Us"),
-      heroButtonUrl: cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact"),
-      heroImage,
-      heroAlt,
-      whyChooseTitle: cleanString(draft.whyChooseTitle || "Why this page matters"),
-      whyChooseItems: whyChooseItems.length ? whyChooseItems : fallbackServiceWhyChoose(input),
-      servicesTitle: cleanString(draft.servicesTitle || "What this page should highlight"),
-      services: services.length ? services : fallbackServiceItems(input),
-      ctaPanel: {
-        headline: cleanString(
-          draft.ctaPanel?.headline || `Need help with ${topic}?`
-        ),
-        text: cleanString(
-          draft.ctaPanel?.text ||
-            `Turn stronger visibility and clearer positioning into better-quality enquiries.`
-        ),
-        buttonLabel: cleanString(
-          input.ctaLabel || draft.ctaPanel?.buttonLabel || "Contact Us"
-        ),
-        buttonUrl: cleanString(
-          input.ctaUrl || draft.ctaPanel?.buttonUrl || "https://marketingspecialists.co.za/contact"
-        )
-      },
-      insightsTitle: cleanString(draft.insightsTitle || "Related Insights"),
-      related,
-      faqTitle: cleanString(draft.faqTitle || `${topic} FAQs`),
-      faqs:
-        faqs.length
-          ? faqs
-          : [
-              {
-                question: `What should businesses compare before choosing ${topic}?`,
-                answer:
-                  "They should look beyond price alone and compare strategy, relevance, credibility, expected scope of work, and whether the page or service genuinely matches their business goals."
-              },
-              {
-                question: `Can ${topic} improve lead quality?`,
-                answer:
-                  "It can when the page and offer are properly aligned with the right audience, stronger intent targeting, and clearer commercial positioning."
-              },
-              {
-                question: `How long does it take to see movement from ${topic}?`,
-                answer:
-                  "That depends on the competition, the quality of the current setup, and how much strategic work still needs to be done, but stronger structure and clearer targeting often improve performance over time."
-              },
-              {
-                question: `Is a generic approach enough for ${topic}?`,
-                answer:
-                  "Usually not. Stronger results tend to come from pages and strategies that reflect the real market, real buyer concerns, and the actual commercial context of the service."
-              }
-            ],
-      internalLinks,
-      externalLinks
-    };
-  }
-
-  const sections = coerceSections(draft.sections, 8);
-  const faqs = coerceFaqs(draft.faqs, 5);
-
-  return {
-    type: pageType,
-    path: pagePath,
-    title: cleanString(draft.title || topic),
-    metaDescription: cleanString(
-      draft.metaDescription ||
-        `Learn about ${topic} and how it supports visibility, search intent, and business growth.`
-    ),
-    eyebrow: cleanString(draft.eyebrow || defaultEyebrow(pageType)),
-    heroImage,
-    heroAlt,
-    intro: cleanString(
-      draft.intro ||
-        `Learn about ${topic}, why it matters, and how a stronger page structure can support visibility and enquiries.`
-    ),
-    sections: sections.length ? sections : fallbackGuideSections(input, pageType),
-    faqTitle: cleanString(draft.faqTitle || `${topic} FAQs`),
-    faqs:
-      faqs.length
-        ? faqs
-        : [
-            {
-              question: `What should businesses understand first about ${topic}?`,
-              answer:
-                "They should start by understanding the search intent behind the topic, because a page that matches the query properly is more useful than one that simply repeats keywords."
-            },
-            {
-              question: `Why does page structure matter for ${topic}?`,
-              answer:
-                "Because stronger structure helps readers find answers faster, makes the page easier to understand, and improves the chances of turning attention into action."
-            },
-            {
-              question: `Can a guide about ${topic} still support commercial goals?`,
-              answer:
-                "Yes. A useful guide can educate readers, build trust, reduce confusion, and create a natural bridge toward relevant services or next-step pages."
-            },
-            {
-              question: `How can businesses make ${topic} more useful for readers?`,
-              answer:
-                "They should focus on answering real questions clearly, using better headings, stronger explanations, and content that feels relevant to the reader’s actual situation."
-            },
-            {
-              question: `What usually weakens pages about ${topic}?`,
-              answer:
-                "Thin copy, vague headings, generic advice, weak intent matching, and content that sounds like it could apply to any keyword rather than this one."
-            }
-          ],
-    cta: {
-      headline: cleanString(
-        draft.cta?.headline || `Need help with ${topic}?`
-      ),
-      text: cleanString(
-        draft.cta?.text ||
-          `Build a smarter page strategy that supports visibility, trust, and stronger enquiries.`
-      ),
-      buttonLabel: cleanString(
-        input.ctaLabel || draft.cta?.buttonLabel || "Contact Us"
-      ),
-      buttonUrl: cleanString(
-        input.ctaUrl || draft.cta?.buttonUrl || "https://marketingspecialists.co.za/contact"
-      )
-    },
-    related,
-    internalLinks,
-    externalLinks
-  };
-}
-
-function buildMasterPrompt(input) {
+function buildPromptForType(input) {
   const pageType = normaliseType(input.pageType);
   const topic = cleanString(input.topic || "");
   const primaryKeyword = cleanString(input.primaryKeyword || "");
@@ -446,47 +327,29 @@ function buildMasterPrompt(input) {
   const ctaLabel = cleanString(input.ctaLabel || "Contact Us");
   const ctaUrl = cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact");
 
-  const coreMasterPrompt = `
-Imagine you are the best SEO content writer in the world. We have to write pages that can compete for page-one visibility on Google. The content must be high quality, original, commercially intelligent, and fully aligned with search intent. Make sure the reader finds what they are searching for and understands it clearly.
+  const sharedContext = `
+You are writing for The Marketing Specialists.
 
-Use strong original thinking and synthesis. Do not merely echo generic website copy. Make the content teach readers something genuinely useful. It should be original, high-value, factual, and well structured.
-
-Writing rules:
+Use these rules like a bible:
 - Use UK English only.
-- Use short paragraphs.
 - No emojis.
 - No fluff.
 - No plagiarism.
-- No copied phrasing.
 - No robotic phrasing.
-- No vague filler.
-- No grammar mistakes.
-- The writing must feel human, natural, and readable.
-- Use burstiness, variation, rhythm, and clear flow.
+- No generic filler.
+- No markdown.
+- No commentary outside JSON.
+- Write like a high-level human SEO content strategist.
+- Make the content commercially intelligent and useful.
+- Match search intent properly.
 - Use the focus keyword naturally.
-- Use subheadings that genuinely help the page rank and help the reader understand.
-- Write with readability in mind so the content can be understood easily by ordinary readers.
+- Keep paragraphs short and readable.
+- Make headings specific and valuable.
+- Make FAQs realistic.
+- Do not invent statistics, awards, or credentials.
 - Do not hallucinate facts.
-- Do not invent awards, statistics, or credentials.
-- Do not output markdown.
-- Do not write commentary outside the JSON.
-`;
+- Return valid JSON only.
 
-  const strategyRules = `
-SEO and commercial rules:
-- Match the stated search intent properly.
-- Make the title strong, clear, and publishable.
-- Make the meta description concise and attractive.
-- Make the page commercially useful without sounding pushy.
-- If the page is local, reflect the local context naturally.
-- If the page is industry-specific, reflect the industry's buying logic naturally.
-- If the page is service-based, make it feel like a genuine landing page rather than a blog post.
-- FAQs must feel realistic and based on what searchers would genuinely ask.
-- Internal links should be relevant and use sensible anchor ideas.
-- External links should be authoritative and credible if included.
-`;
-
-  const inputContext = `
 Target audience: ${audience}
 Focus keyword: ${primaryKeyword}
 Topic: ${topic}
@@ -499,14 +362,101 @@ CTA URL: ${ctaUrl}
 Extra instructions: ${extraInstructions}
 `;
 
-  const guideShape = `
+  if (pageType === "service") {
+    return `
+${sharedContext}
+
+This is a SERVICE PAGE draft.
+You are NOT allowed to choose the page type, path, eyebrow, hero image, hero alt, related links, or internal links. Those are controlled by the system.
+You are only writing the service-page content fields.
+
+Service page rules:
+- Make it feel like a serious landing page, not a blog post.
+- Hero text should be concise, persuasive, and commercially relevant.
+- whyChooseItems must sound like real buying reasons, not vague claims.
+- services must describe useful strategic components, not empty wording.
+- FAQs should sound like genuine pre-enquiry questions.
+- The copy should help a business owner make a better decision.
+- Avoid sounding salesy for the sake of it.
+- The content must feel publishable.
+
 Return exactly this JSON shape:
 {
   "title": "string",
   "metaDescription": "string",
-  "eyebrow": "string",
-  "heroImage": "string",
-  "heroAlt": "string",
+  "heroTitle": "string",
+  "heroText": "string",
+  "whyChooseTitle": "string",
+  "whyChooseItems": [
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" }
+  ],
+  "servicesTitle": "string",
+  "services": [
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" },
+    { "title": "string", "text": "string" }
+  ],
+  "ctaPanel": {
+    "headline": "string",
+    "text": "string"
+  },
+  "faqTitle": "string",
+  "faqs": [
+    { "question": "string", "answer": "string" },
+    { "question": "string", "answer": "string" },
+    { "question": "string", "answer": "string" },
+    { "question": "string", "answer": "string" }
+  ],
+  "externalLinks": [
+    { "anchor": "string", "url": "string" },
+    { "anchor": "string", "url": "string" }
+  ]
+}
+`;
+  }
+
+  const typeSpecific =
+    pageType === "city"
+      ? `
+This is a CITY PAGE draft.
+Make it feel location-aware without stuffing the city unnaturally.
+The page should reflect how buyers in that city might search and compare options.
+`
+      : pageType === "industry"
+      ? `
+This is an INDUSTRY PAGE draft.
+Make it feel sector-aware and grounded in how that industry thinks about buying, trust, and visibility.
+`
+      : `
+This is a GUIDE PAGE draft.
+Make it informative, strategically useful, and commercially aware without sounding like a sales page.
+`;
+
+  return `
+${sharedContext}
+
+${typeSpecific}
+
+You are NOT allowed to choose the page type, path, eyebrow, hero image, hero alt, related links, or internal links. Those are controlled by the system.
+You are only writing the content fields.
+
+Guide-like page rules:
+- Start with a strong, useful intro.
+- Use 6 to 8 meaningful sections.
+- Each section must add something new.
+- Do not repeat yourself.
+- Make the page feel like a strong long-form SEO draft.
+- FAQs should feel realistic.
+- The CTA should feel contextually relevant.
+
+Return exactly this JSON shape:
+{
+  "title": "string",
+  "metaDescription": "string",
   "intro": "string",
   "sections": [
     { "heading": "string", "body": "string" },
@@ -528,158 +478,235 @@ Return exactly this JSON shape:
   ],
   "cta": {
     "headline": "string",
-    "text": "string",
-    "buttonLabel": "string",
-    "buttonUrl": "string"
+    "text": "string"
   },
-  "related": ["string", "string", "string"],
-  "internalLinks": [
-    { "anchor": "string", "path": "string" },
-    { "anchor": "string", "path": "string" }
-  ],
   "externalLinks": [
     { "anchor": "string", "url": "string" },
     { "anchor": "string", "url": "string" }
   ]
 }
 `;
-
-  const serviceShape = `
-Return exactly this JSON shape:
-{
-  "title": "string",
-  "metaDescription": "string",
-  "eyebrow": "string",
-  "heroTitle": "string",
-  "heroText": "string",
-  "heroImage": "string",
-  "heroAlt": "string",
-  "whyChooseTitle": "string",
-  "whyChooseItems": [
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" }
-  ],
-  "servicesTitle": "string",
-  "services": [
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" },
-    { "title": "string", "text": "string" }
-  ],
-  "ctaPanel": {
-    "headline": "string",
-    "text": "string",
-    "buttonLabel": "string",
-    "buttonUrl": "string"
-  },
-  "insightsTitle": "string",
-  "related": ["string", "string", "string"],
-  "faqTitle": "string",
-  "faqs": [
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" },
-    { "question": "string", "answer": "string" }
-  ],
-  "internalLinks": [
-    { "anchor": "string", "path": "string" },
-    { "anchor": "string", "path": "string" }
-  ],
-  "externalLinks": [
-    { "anchor": "string", "url": "string" },
-    { "anchor": "string", "url": "string" }
-  ]
-}
-`;
-
-  const serviceInstructions = `
-Service-page instructions:
-- This is not a blog article.
-- It must feel like a serious commercial landing page.
-- The title must align with the service angle.
-- The hero text must be concise, clear, and persuasive.
-- whyChooseItems must sound like real buying reasons, not empty marketing buzzwords.
-- services must describe useful strategic components, not generic filler.
-- The copy should speak to a business owner or buyer with commercial intent.
-- FAQs should sound like pre-enquiry questions.
-- Do not drift into generic educational article territory.
-`;
-
-  const nonServiceInstructions = `
-Guide-like page instructions:
-- This page should be informative, but commercially aware.
-- Use stronger depth and clearer logic than generic SEO articles.
-- Every section should add something new.
-- Avoid repeating the same point in different words.
-- The content should feel like it could genuinely outrank thin competing pages if refined properly.
-- For city pages, weave the location in naturally without stuffing it.
-- For industry pages, reflect the sector context clearly.
-`;
-
-  const wordDiscipline =
-    pageType === "service"
-      ? `
-Length and depth guidance:
-- Make the service-page draft substantial.
-- whyChooseItems text should each be around 45 to 80 words.
-- services text should each be around 45 to 90 words.
-- FAQ answers should each be around 55 to 110 words.
-`
-      : `
-Length and depth guidance:
-- Write a substantial long-form draft.
-- The intro should be around 120 to 180 words.
-- Each section body should usually be around 120 to 220 words.
-- FAQ answers should each be around 50 to 110 words.
-- The total draft should feel like a serious long-form SEO piece, not a skimpy outline.
-`;
-
-  return `
-${coreMasterPrompt}
-
-${strategyRules}
-
-${inputContext}
-
-${wordDiscipline}
-
-${pageType === "service" ? serviceInstructions : nonServiceInstructions}
-
-Additional hard rules:
-- If page type is "service", do not return guide-style article logic.
-- If page type is "service", do not use "type": "guide".
-- Related must be internal HTML paths only.
-- internalLinks must use internal HTML paths only.
-- externalLinks must use full https URLs only.
-- heroImage must be a full https URL.
-- Return JSON only.
-
-${pageType === "service" ? serviceShape : guideShape}
-`;
 }
 
-function validateDraft(draft, input) {
-  const pageType = normaliseType(input.pageType);
+async function runModel(ai, prompt, strictMode = false) {
+  const systemPrompt = strictMode
+    ? "You are an elite SEO strategist and commercial content architect. Return valid JSON only. No markdown. No notes. No commentary."
+    : "You are a high-level SEO strategist. Return valid JSON only.";
 
-  if (!draft || typeof draft !== "object") {
-    throw new Error("Draft is not an object.");
+  return ai.run("@cf/meta/llama-3.1-8b-instruct-fast", {
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: prompt }
+    ],
+    max_tokens: 4000,
+    temperature: strictMode ? 0.12 : 0.18
+  });
+}
+
+function validateParsed(parsed, pageType) {
+  if (!parsed || typeof parsed !== "object") {
+    throw new Error("Model output is not a JSON object.");
   }
 
   if (pageType === "service") {
-    if (!Array.isArray(draft.whyChooseItems) || draft.whyChooseItems.length < 3) {
-      throw new Error("Service draft is missing strong whyChooseItems.");
+    if (!cleanString(parsed.title)) throw new Error("Missing service title.");
+    if (!cleanString(parsed.metaDescription)) throw new Error("Missing service meta description.");
+    if (!cleanString(parsed.heroTitle)) throw new Error("Missing service heroTitle.");
+    if (!cleanString(parsed.heroText)) throw new Error("Missing service heroText.");
+    if (coerceInfoItems(parsed.whyChooseItems, 4).length < 3) {
+      throw new Error("Missing enough whyChooseItems.");
     }
-    if (!Array.isArray(draft.services) || draft.services.length < 3) {
-      throw new Error("Service draft is missing service content blocks.");
+    if (coerceInfoItems(parsed.services, 4).length < 3) {
+      throw new Error("Missing enough service items.");
+    }
+    if (coerceFaqs(parsed.faqs, 4, 4).length < 3) {
+      throw new Error("Missing enough service FAQs.");
     }
     return;
   }
 
-  if (!Array.isArray(draft.sections) || draft.sections.length < 6) {
-    throw new Error("Guide-style draft is missing enough sections.");
+  if (!cleanString(parsed.title)) throw new Error("Missing page title.");
+  if (!cleanString(parsed.metaDescription)) throw new Error("Missing meta description.");
+  if (!cleanString(parsed.intro)) throw new Error("Missing intro.");
+  if (coerceSections(parsed.sections, 6, 8).length < 6) {
+    throw new Error("Missing enough sections.");
   }
+  if (coerceFaqs(parsed.faqs, 4, 5).length < 3) {
+    throw new Error("Missing enough FAQs.");
+  }
+}
+
+async function generateStructuredDraft(ai, input) {
+  const pageType = normaliseType(input.pageType);
+  const prompt = buildPromptForType(input);
+
+  const first = await runModel(ai, prompt, false);
+  const firstText = first?.response || "";
+  let parsed;
+
+  try {
+    parsed = JSON.parse(extractJson(firstText));
+    validateParsed(parsed, pageType);
+    return parsed;
+  } catch {
+    const retryPrompt = `${prompt}
+
+Your previous attempt failed validation.
+Try again and obey the schema exactly.
+Do not include forbidden fields.
+Do not choose the page type or path.
+Do not return placeholders.
+Return JSON only.`;
+
+    const second = await runModel(ai, retryPrompt, true);
+    const secondText = second?.response || "";
+    parsed = JSON.parse(extractJson(secondText));
+    validateParsed(parsed, pageType);
+    return parsed;
+  }
+}
+
+function buildFinalDraft(parsed, input) {
+  const pageType = normaliseType(input.pageType);
+  const topic = cleanString(input.topic || input.primaryKeyword || "Untitled page");
+  const slug = slugify(input.slug || input.primaryKeyword || input.topic || "new-page");
+  const path = defaultPathForType(pageType, slug);
+  const heroImage = defaultHeroImage(pageType);
+  const heroAlt = defaultHeroAlt(pageType, topic, input.city, input.industry);
+  const related = defaultRelated(pageType);
+  const internalLinks = defaultInternalLinks(pageType);
+  const externalLinks = sanitiseExternalLinks(parsed.externalLinks);
+
+  if (pageType === "service") {
+    const whyChooseItems = coerceInfoItems(parsed.whyChooseItems, 4);
+    const services = coerceInfoItems(parsed.services, 4);
+    const faqs = coerceFaqs(parsed.faqs, 4, 4);
+
+    return {
+      type: "service",
+      path,
+      title: cleanString(parsed.title || topic),
+      metaDescription: cleanString(
+        parsed.metaDescription ||
+          `Explore ${topic} and how it can support visibility, enquiries, and business growth.`
+      ),
+      eyebrow: defaultEyebrow(pageType),
+      heroTitle: cleanString(parsed.heroTitle || parsed.title || topic),
+      heroText: cleanString(
+        parsed.heroText ||
+          `Learn how ${topic} can improve visibility, strengthen trust, and support lead generation.`
+      ),
+      heroButtonLabel: cleanString(input.ctaLabel || "Contact Us"),
+      heroButtonUrl: cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact"),
+      heroImage,
+      heroAlt,
+      whyChooseTitle: cleanString(parsed.whyChooseTitle || "Why this page matters"),
+      whyChooseItems: whyChooseItems.length ? whyChooseItems : fallbackServiceWhyChoose(input),
+      servicesTitle: cleanString(parsed.servicesTitle || "What this page should highlight"),
+      services: services.length ? services : fallbackServiceItems(input),
+      ctaPanel: {
+        headline: cleanString(parsed.ctaPanel?.headline || `Need help with ${topic}?`),
+        text: cleanString(
+          parsed.ctaPanel?.text ||
+            `Turn stronger visibility and clearer positioning into better-quality enquiries.`
+        ),
+        buttonLabel: cleanString(input.ctaLabel || "Contact Us"),
+        buttonUrl: cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact")
+      },
+      insightsTitle: "Related Insights",
+      related,
+      faqTitle: cleanString(parsed.faqTitle || `${topic} FAQs`),
+      faqs: faqs.length
+        ? faqs
+        : [
+            {
+              question: `What should businesses compare before choosing ${topic}?`,
+              answer:
+                "They should compare relevance, strategy, commercial fit, expected scope, and whether the service genuinely matches the business problem they are trying to solve."
+            },
+            {
+              question: `Can ${topic} improve lead quality?`,
+              answer:
+                "It can when the page, message, and offer are aligned with the right audience, stronger intent targeting, and a clearer commercial position."
+            },
+            {
+              question: `How long does it take to see movement from ${topic}?`,
+              answer:
+                "That depends on competition, the current quality of the setup, and how much strategic work is still needed, but better structure and clearer targeting usually improve performance over time."
+            },
+            {
+              question: `Is a generic approach enough for ${topic}?`,
+              answer:
+                "Usually not. Better results tend to come from pages and strategies that reflect real buyer concerns, real market conditions, and the actual commercial context of the service."
+            }
+          ],
+      internalLinks,
+      externalLinks
+    };
+  }
+
+  const sections = coerceSections(parsed.sections, 6, 8);
+  const faqs = coerceFaqs(parsed.faqs, 4, 5);
+
+  return {
+    type: pageType,
+    path,
+    title: cleanString(parsed.title || topic),
+    metaDescription: cleanString(
+      parsed.metaDescription ||
+        `Learn about ${topic} and how it supports visibility, search intent, and business growth.`
+    ),
+    eyebrow: defaultEyebrow(pageType),
+    heroImage,
+    heroAlt,
+    intro: cleanString(
+      parsed.intro ||
+        `Learn about ${topic}, why it matters, and how a stronger page structure can support visibility and enquiries.`
+    ),
+    sections: sections.length ? sections : fallbackGuideSections(input),
+    faqTitle: cleanString(parsed.faqTitle || `${topic} FAQs`),
+    faqs: faqs.length
+      ? faqs
+      : [
+          {
+            question: `What should businesses understand first about ${topic}?`,
+            answer:
+              "They should first understand the search intent behind the topic, because a page that matches the query properly is far more useful than one that simply repeats keywords."
+          },
+          {
+            question: `Why does page structure matter for ${topic}?`,
+            answer:
+              "Because stronger structure helps readers find answers faster, makes the page easier to understand, and improves the chances of turning attention into action."
+          },
+          {
+            question: `Can a page about ${topic} still support commercial goals?`,
+            answer:
+              "Yes. Useful content can educate readers, build trust, reduce confusion, and create a natural path toward relevant services or supporting pages."
+          },
+          {
+            question: `How can businesses make ${topic} more useful for readers?`,
+            answer:
+              "They should focus on answering real questions clearly, using better headings, stronger explanations, and content that feels relevant to the reader’s actual situation."
+          },
+          {
+            question: `What usually weakens pages about ${topic}?`,
+            answer:
+              "Thin copy, vague headings, generic advice, weak intent matching, and content that sounds like it could apply to almost any keyword rather than this specific one."
+          }
+        ],
+    cta: {
+      headline: cleanString(parsed.cta?.headline || `Need help with ${topic}?`),
+      text: cleanString(
+        parsed.cta?.text ||
+          `Build a smarter page strategy that supports visibility, trust, and stronger enquiries.`
+      ),
+      buttonLabel: cleanString(input.ctaLabel || "Contact Us"),
+      buttonUrl: cleanString(input.ctaUrl || "https://marketingspecialists.co.za/contact")
+    },
+    related,
+    internalLinks,
+    externalLinks
+  };
 }
 
 export async function onRequestOptions() {
@@ -715,37 +742,12 @@ export async function onRequestPost(context) {
       );
     }
 
-    const prompt = buildMasterPrompt({
+    const parsed = await generateStructuredDraft(context.env.AI, {
       ...input,
       pageType
     });
 
-    const result = await context.env.AI.run("@cf/meta/llama-3.1-8b-instruct-fast", {
-      messages: [
-        {
-          role: "system",
-          content:
-            "You are an elite SEO strategist, commercial content architect, and long-form writer for The Marketing Specialists. Return valid JSON only. No markdown. No notes. No explanations."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      max_tokens: 4000,
-      temperature: 0.15
-    });
-
-    const rawText = result?.response || "";
-    const jsonText = extractJson(rawText);
-    const parsed = JSON.parse(jsonText);
-
-    validateDraft(parsed, {
-      ...input,
-      pageType
-    });
-
-    const draft = coerceDraft(parsed, {
+    const draft = buildFinalDraft(parsed, {
       ...input,
       pageType
     });
